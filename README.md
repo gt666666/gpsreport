@@ -29,4 +29,5 @@
     "success": true
 }
 ```
-更多测试请看 com.ynzhongxi.gpsreport.controller.TestCtl 
+更多测试请看 com.ynzhongxi.gpsreport.controller.TestCtl ，也可使用 postman进行测试；
+postman测试接口在 docs/postman测试接口.json 。
