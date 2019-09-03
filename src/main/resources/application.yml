@@ -1,0 +1,35 @@
+server:
+  port: 8086
+
+spring:
+  http:
+    encoding:
+      force: true
+      charset: UTF-8
+      enabled: true
+
+  mvc:
+    #出现错误时, 直接抛出异常
+    throw-exception-if-no-handler-found: true
+    resources:
+      #不要为我们工程中的资源文件建立映射
+      add-mappings: false
+
+  # 启用的配置文件
+  profiles:
+    active: dev
+
+  # spring data for mongodb
+  data:
+    mongodb:
+      port: 27017
+      database: pgsReport
+
+logging:
+  level:
+    com.ynzhongxi.log: debug
+  file: E:/develop/logs/pgs_report/log.log
+
+### 自定义属性 ###
+custom:
+  web-name: 北斗主动安全云平台-报表

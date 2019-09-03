@@ -1,0 +1,88 @@
+{
+	"variables": [],
+	"info": {
+		"name": "测试接口",
+		"_postman_id": "3cd7bb61-c7f8-fcb3-eefd-5c801d69536d",
+		"description": "测试接口",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "127.0.0.1:8086/test/webName",
+			"request": {
+				"url": "127.0.0.1:8086/test/webName",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "127.0.0.1:8086/test/save",
+			"request": {
+				"url": "127.0.0.1:8086/test/save?loginNum=1&isDelete=0&createTime=1567482751325&ip=1886444677",
+				"method": "POST",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "127.0.0.1:8086/test/get",
+			"request": {
+				"url": "127.0.0.1:8086/test/get?id=5d6de3ac44b8b45338a7eb7b",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "127.0.0.1:8086/test/list",
+			"request": {
+				"url": "127.0.0.1:8086/test/list?loginNum=1",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "127.0.0.1:8086/test/find",
+			"request": {
+				"url": "127.0.0.1:8086/test/find?ip=1886444649",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "127.0.0.1:8086/test/page",
+			"request": {
+				"url": "127.0.0.1:8086/test/page?isDelete=0&page=1&limit=2",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "127.0.0.1:8086/test/deleteById",
+			"request": {
+				"url": "127.0.0.1:8086/test/deleteById?id=5d6de44444b8b45338a7eb7d",
+				"method": "POST",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}

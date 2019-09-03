@@ -1,0 +1,12 @@
+spring:
+  # spring data for mongodb
+  data:
+    mongodb:
+      host: 127.0.0.1
+
+logging:
+  level:
+    com:
+      ynzhongxi:
+        gpsreport: debug
+  file: /opt/logs/pgs_report/log.log
