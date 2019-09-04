@@ -16,4 +16,6 @@ public class GpsCarInfo {
     private String deviceId;
     /**驾驶员**/
     private String driverName;
+    /**驾驶员手机号**/
+    private String phone;
 }
