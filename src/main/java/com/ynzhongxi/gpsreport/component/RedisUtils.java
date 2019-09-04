@@ -1,8 +1,8 @@
 package com.ynzhongxi.gpsreport.component;
 
+import cn.hutool.core.collection.CollUtil;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -103,7 +103,7 @@ public class RedisUtils {
     }
 
     /**
-     * 根据key删除
+     * 根据key删除键值对
      *
      * @param key 可以传一个值或多个
      */
@@ -112,8 +112,7 @@ public class RedisUtils {
             if (key.length == 1) {
                 redisTemplate.delete(key[0]);
             } else {
-                List<String> list = CollectionUtils.arrayToList(key);
-                redisTemplate.delete(list);
+                redisTemplate.delete(CollUtil.toList(key));
             }
         }
     }
@@ -122,10 +121,13 @@ public class RedisUtils {
      * 根据key获取值
      *
      * @param key 键
-     * @return 值
+     * @return 值，如果键为空，将返回null
      */
     public Object get(String key) {
-        return key == null ? null : redisTemplate.opsForValue().get(key);
+        if (isBlank(key)) {
+            return null;
+        }
+        return redisTemplate.opsForValue().get(key);
     }
 
     /**
@@ -133,15 +135,13 @@ public class RedisUtils {
      *
      * @param key   键
      * @param value 值
-     * @return true成功 false失败
+     * @return true成功，false失败
      */
-    public boolean set(String key, Object value) {
+    public void set(String key, Object value) {
         try {
             redisTemplate.opsForValue().set(key, value);
-            return true;
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
     }
 
@@ -167,14 +167,18 @@ public class RedisUtils {
         }
     }
 
+    ///////////////////////////////////////
+    /////////// 计数器 /////////////////////
+    //////////////////////////////////////
+
     /**
      * 计数器，在key对应的值上指定数值
      *
-     * @param key   键
+     * @param key   键，如果已存在就累加，不存在就创建并设置初始值为delta
      * @param delta 要增加几(大于0)
-     * @return 返回累加后的结果
+     * @return 返回累加后的结果，如果存在的值类型不是数字会抛出异常，为了保证性能，这里不进行取值判断，特殊情况请自行处理。
      */
-    public long incr(String key, long delta) {
+    public Long incr(String key, long delta) {
         if (delta < 0) {
             throw new RuntimeException("递增因子必须大于0");
         }
@@ -185,20 +189,20 @@ public class RedisUtils {
      * 计数器，在key对应的值+1
      *
      * @param key 键
-     * @return 返回累加后的结果
+     * @return 返回累加后的结果，处理结果和上一个一直
      */
-    public long incr(String key) {
+    public Long incr(String key) {
         return redisTemplate.opsForValue().increment(key, 1L);
     }
 
     /**
-     * 计数器，在key对应的值减去指定数值
+     * 计数器，在key对应的值减去指定数值，操作方式基本和累加器一致
      *
      * @param key   键
-     * @param delta 要减少几(小于0)
-     * @return 返回执行后的结果
+     * @param delta 要减少几
+     * @return 返回执行后的结果，会被递减为负数
      */
-    public long decr(String key, long delta) {
+    public Long decr(String key, long delta) {
         if (delta < 0) {
             throw new RuntimeException("递减因子必须大于0");
         }
@@ -206,27 +210,31 @@ public class RedisUtils {
     }
 
     /**
-     * 计数器，在key对应的值+1
+     * 计数器，在key对应的值-1
      *
      * @param key 键
      * @return 返回累加后的结果
      */
-    public long decr(String key) {
+    public Long decr(String key) {
         return redisTemplate.opsForValue().increment(key, -1L);
     }
 
+    ///////////////////////////////////////
+    /////////// Map(hash表) ///////////////
+    //////////////////////////////////////
+
     /**
-     * 根据键值和存储的map对象的键值获取值
+     * 根据键值和存储的Map的键值获取值
      *
-     * @param key  键
-     * @param item 项
+     * @param key  存储的键值
+     * @param mKey Map的键值
      * @return 值
      */
-    public Object hget(String key, String item) {
-        if (null == key || null == item) {
+    public Object hget(String key, String mKey) {
+        if (null == key || null == mKey) {
             throw new RuntimeException("获取的key和key对应的map的key不能为null.");
         }
-        return redisTemplate.opsForHash().get(key, item);
+        return redisTemplate.opsForHash().get(key, mKey);
     }
 
     /**

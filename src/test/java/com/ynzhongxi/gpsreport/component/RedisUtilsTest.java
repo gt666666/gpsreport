@@ -25,6 +25,19 @@ public class RedisUtilsTest extends BaseSpringBootTest {
         print(redis.hasKey("key001"));
     }
 
+    @Test
+    public void incr() {
+        redis.set("key001", 3L);
+        print(redis.incr("key001", 1L));
+        print(redis.incr("incr001"));
+    }
+
+    @Test
+    public void decr() {
+        print(redis.decr("key001", 1L));
+        print(redis.decr("incr001"));
+    }
+
     @Override
     public String baseUrl() {
         return null;
