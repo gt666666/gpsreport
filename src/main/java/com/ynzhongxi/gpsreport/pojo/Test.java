@@ -2,13 +2,15 @@ package com.ynzhongxi.gpsreport.pojo;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * 测试类
  *
  * @author lixingwu
  */
 @Data
-public class Test {
+public class Test implements Serializable {
     /** MongoDb自动生成的唯一标识 */
     private String id;
     /** 登录次数，数字 */
