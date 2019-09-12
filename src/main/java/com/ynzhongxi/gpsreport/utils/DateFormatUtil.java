@@ -3,6 +3,7 @@ package com.ynzhongxi.gpsreport.utils;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -59,5 +60,8 @@ public class DateFormatUtil {
      */
     public static String nowMilliSecond() {
         return DateUtil.format(new Date(), YYYYM_MDDH_HMMSSSSS_FORMAT);
+    }
+    public  static  String simpleDate(Long  time){
+        return    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(time);
     }
 }

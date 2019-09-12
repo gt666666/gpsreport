@@ -1,8 +1,10 @@
 spring:
   # spring data for mongodb
+
   data:
     mongodb:
       host: 192.168.2.88
+      database: pgsReport
 
   redis:
     host: 192.168.2.88
@@ -14,3 +16,5 @@ logging:
       ynzhongxi:
         gpsreport: debug
   file: E:/develop/logs/pgs_report/log.log
+
+

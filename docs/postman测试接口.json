@@ -1,13 +1,13 @@
 {
 	"variables": [],
 	"info": {
-		"name": "测试接口",
+		"name": "测试接口1",
 		"_postman_id": "3cd7bb61-c7f8-fcb3-eefd-5c801d69536d",
 		"description": "测试接口",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
 	"item": [
-		{
+			{
 			"name": "127.0.0.1:8086/test/webName",
 			"request": {
 				"url": "127.0.0.1:8086/test/webName",
@@ -75,6 +75,17 @@
 		},
 		{
 			"name": "127.0.0.1:8086/test/deleteById",
+			"request": {
+				"url": "127.0.0.1:8086/test/deleteById?id=5d6de44444b8b45338a7eb7d",
+				"method": "POST",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "会员数据",
 			"request": {
 				"url": "127.0.0.1:8086/test/deleteById?id=5d6de44444b8b45338a7eb7d",
 				"method": "POST",

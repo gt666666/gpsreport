@@ -10,5 +10,7 @@ public class GpsCarInfoDao extends BaseMongoDbDao {
         return GpsCarInfo.class;
     }
 
+
+
 }
 
