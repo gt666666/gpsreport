@@ -2,24 +2,20 @@ package com.ynzhongxi.gpsreport;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.http.HttpUtil;
-import cn.hutool.json.JSON;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
+import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
 import com.ynzhongxi.gpsreport.component.RedisUtils;
-import com.ynzhongxi.gpsreport.pojo.CarInfo;
-import com.ynzhongxi.gpsreport.pojo.Course;
-import com.ynzhongxi.gpsreport.pojo.GpsCarInfo;
-import com.ynzhongxi.gpsreport.pojo.Student;
+import com.ynzhongxi.gpsreport.pojo.*;
 import com.ynzhongxi.gpsreport.utils.DateFormatUtil;
-import com.ynzhongxi.gpsreport.utils.GspHttpUtil;
+import com.ynzhongxi.gpsreport.utils.GpsHttpUtil;
 import com.ynzhongxi.gpsreport.utils.JxlsUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.mongodb.core.ExecutableRemoveOperation;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -30,6 +26,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import javax.annotation.Resource;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -46,7 +43,7 @@ public class TestMongo extends BaseSpringBootTest {
     private RedisTemplate<String, String> redisTemplate;
     private static String LOGURL = "http://60.161.53.204:8088/StandardApiAction_login.action?account=htgs&password=000000";
     @Autowired
-    private GspHttpUtil gspHttpUtil;
+    private GpsHttpUtil gpsHttpUtil;
     @Autowired
     private MongoTemplate mongoTemplate;
     @Resource
@@ -88,183 +85,397 @@ public class TestMongo extends BaseSpringBootTest {
         map.put("armType", "14");    //报警类型
         map.put("pageRecords", 100);   //显示前100条记录
         map.put("devIdno", "014192908405");
-        System.out.println(gspHttpUtil.get("/StandardApiAction_queryAlarmDetail.action", map));
+        System.out.println(gpsHttpUtil.get("/StandardApiAction_queryAlarmDetail.action", map));
     }
 
     @Test
-    public void insertGpsCarInfo() {
-        this.mongoTemplate.dropCollection("gpsCarInfo");
-        Criteria criteria = new Criteria();
-        criteria.orOperator(Criteria.where("driverName").exists(true), Criteria.where("driverName").is(""));   //条件为:驾驶员姓名不为空
-        Query query = new Query(criteria);
-        List<CarInfo> carInfos = this.mongoTemplate.find(query, CarInfo.class);   //查询出所有驾驶员姓名不为空的数据
-        Iterator<CarInfo> iter = carInfos.iterator();
-        List<GpsCarInfo> gpsCarInfos = new ArrayList<>();    //保存所有驾驶员的台账信息
+    public void insertHGpsCarInfo() {
+        this.mongoTemplate.dropCollection("hGpsCarInfo");
+        List<HCarInfo> carInfos = this.mongoTemplate.findAll(HCarInfo.class);   //查询出所有驾驶员数据
+        Iterator<HCarInfo> iter = carInfos.iterator();
+        List<HGpsCarInfo> hgpsCarInfos = new ArrayList<>();    //保存所有驾驶员的台账信息
+        List<HGpsCarDetails> hgpsCarDetails=new ArrayList<>();    //全部每日处理详细表
         while (iter.hasNext()) {
-            CarInfo carInfo = iter.next();
-            GpsCarInfo gpsCarInfo = new GpsCarInfo();
-            gpsCarInfo.setCarNumber(carInfo.getCarNumber());
-            gpsCarInfo.setDriverName(carInfo.getDriverName());
-            gpsCarInfo.setPhone(carInfo.getPhone());
+            HCarInfo carInfo = iter.next();
+            HGpsCarInfo hgpsCarInfo = new HGpsCarInfo();
+            hgpsCarInfo.setCarNumber(carInfo.getCarNumber());   //车牌号
+            hgpsCarInfo.setDriverName(carInfo.getDriverName());  //驾驶员名字
+            hgpsCarInfo.setPhone(carInfo.getPhone());            //驾驶员电话
             Map<String, Object> map = new HashMap<>();
             map.put("devIdno", carInfo.getDeviceId());   //设备号
-            String one = gspHttpUtil.get("/StandardApiAction_getDeviceOlStatus.action", map);  //获取设备在线状态
-            JSONObject json1 = JSONUtil.parseObj(one);
-            if (json1.containsKey("onlines")) {  //判断返回的JSON数据中是否有onlines的JSON数组
-                JSONArray onlines = json1.getJSONArray("onlines");
-                JSONObject online = onlines.getJSONObject(0);
-                int on = online.getInt("online");
-                if (on == 1) {
-                    gpsCarInfo.setOnline("是"); //GPS在线
-                } else {
-                    gpsCarInfo.setOnline("否");   //GPS不在线
-                }
-            }
             map.put("vehiIdno", carInfo.getCarNumber());  //车牌号
             map.put("geoaddress", 1);//解析最新地理位置
-            String in = gspHttpUtil.get("/StandardApiAction_vehicleStatus.action", map);//获取车辆最新位置
+            String in = gpsHttpUtil.get("/StandardApiAction_vehicleStatus.action", map);//获取车辆最新位置
             JSONObject json2 = JSONUtil.parseObj(in);
             String infoStr = json2.getStr("infos");
             if (JSONUtil.isJsonArray(infoStr)) {
                 JSONObject info = JSONUtil.parseArray(infoStr).getJSONObject(0);
                 if (info.getStr("pos") != "" && info.getStr("tm") != null) {   //判断返回的地理位置不能为空、最后在线时间不能为null
-                    gpsCarInfo.setPos(info.getStr("pos"));          //地理位置
-                    if (new Date().getTime() - 86220000L <= info.getLong("tm") && info.getLong("tm") <= new Date().getTime()) {     //每晚23:57统计最后在线时间,当天时间范围00:00~23:57
-                        gpsCarInfo.setTime(DateFormatUtil.simpleDate(info.getLong("tm")));   //当天最后在线时间
+                    hgpsCarInfo.setPos(info.getStr("pos"));          //地理位置
+                    if (new Date().getTime() - 85800000L <= info.getLong("tm") && info.getLong("tm") <= new Date().getTime()) {     //每晚23:50统计最后在线时间,当天时间范围00:00~23:50
+                        hgpsCarInfo.setTime(DateFormatUtil.simpleDate(info.getLong("tm")));   //当天最后在线时间
+                        hgpsCarInfo.setOnline("是");    //GPS在线
+                    } else {
+                        hgpsCarInfo.setOnline("否");   //GPS不在线
                     }
                 }
             }
-            if ("是".equals(gpsCarInfo.getOnline()) && null == gpsCarInfo.getTime()) {
-                gpsCarInfo.setType(1);    //GPS在线，但是返回时间为空，则车台故障
-            } else {
-                gpsCarInfo.setType(0);   //车台没有故障
+            if ("是".equals(hgpsCarInfo.getOnline()) && null == hgpsCarInfo.getPos()) {
+                hgpsCarInfo.setType("✔");    //GPS在线，但是返回时间为空，则车台故障
             }
-            map.put("begintime", DateFormatUtil.simpleDate(new Date().getTime() - 86220000L));  //开始时间
+            map.put("begintime", DateFormatUtil.simpleDate(new Date().getTime() - 85800000L));  //开始时间
             map.put("endtime", DateFormatUtil.simpleDate(new Date().getTime()));       //结束时间
             map.put("armType", "11,61,178,180,200,222,223,224,225,226,227,228,229,230,304,309,311,314,99,125,249,299,306,49,99,125,249,299,306,618,619"); //报警类型:  疲劳：49,99,125,249,299,306,618,619
             map.put("pageRecords", 100);   //显示前100条记录                                                      //超速：11,61,178,180,200,222,223,224,225,226,227,228,229,230,304,309,311,314
             map.put("toMap", 2);  //地图经纬度转换  2：百度地图解析可以解析出地址
-            String baoJin = gspHttpUtil.get("/StandardApiAction_queryAlarmDetail.action", map); //获取设备超速、疲劳驾驶报警数据
+            String baoJin = gpsHttpUtil.get("/StandardApiAction_queryAlarmDetail.action", map); //获取设备超速、疲劳驾驶报警数据
             JSONObject json3 = JSONUtil.parseObj(baoJin);
             String alarmsStr = json3.getStr("alarms");
-            gpsCarInfo.setTired(0);     //无疲劳
-            gpsCarInfo.setSpeed(0);    //无超速
+            hgpsCarInfo.setTired("");     //无疲劳
+            hgpsCarInfo.setSpeed("");    //无超速
+            HGpsCarDetails  hgGpsCarDetails=null;
             if (JSONUtil.isJsonArray(alarmsStr)) {
+                 hgGpsCarDetails=new HGpsCarDetails();//  每日处理详细表
                 JSONArray alarms = JSONUtil.parseArray(alarmsStr);
                 for (int i = 0; i < alarms.size(); i++) {
                     int atp = alarms.getJSONObject(i).getInt("atp");   //报警类型
                     if (CollUtil.toList(11, 61, 178, 180, 200, 222, 223, 224, 225, 226, 227, 228, 229, 230, 304, 309, 311, 314).contains(atp)) {
-                        gpsCarInfo.setSpeed(1);   //超速
-                        gpsCarInfo.setData("有");    //有报警数据
+                        hgpsCarInfo.setSpeed("✔");   //超速
+                        hgpsCarInfo.setProcessMode("□已短信告知驾驶员/  ☑ 已处理   □安全教育  □罚款");   //具体处理方式
+                        hgpsCarInfo.setData("有");    //有报警数据
+                        hgGpsCarDetails.setCarNumber(hgpsCarInfo.getCarNumber());
+                        hgGpsCarDetails.setCarName(hgpsCarInfo.getDriverName());
+                        hgGpsCarDetails.setType("超速报警");
+                        hgGpsCarDetails.setTime(alarms.getJSONObject(alarms.size()-1).getStr("bTimeStr"));//报警时间
+                        hgGpsCarDetails.setSps(alarms.getJSONObject(alarms.size()-1).getStr("sps")); //报警地点
+                        hgGpsCarDetails.setSpeed(alarms.getJSONObject(alarms.size()-1).getInt("ssp")/10.0);//车速ssp
+                        hgGpsCarDetails.setWay("短信通知");  //处理方式
+                        hgGpsCarDetails.setStatus("发送成功"); //回执状态
+                        hgGpsCarDetails.setWayTime(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));  //处理时间
+                        hgGpsCarDetails.setNote("已对其进行批评教育责令改正");//备注
                     }
                     if (CollUtil.toList(49, 99, 125, 249, 299, 306, 618, 619).contains(atp)) {
-                        gpsCarInfo.setTired(1);   //疲劳
-                        gpsCarInfo.setData("有");    //有报警数据
+                        hgpsCarInfo.setTired("✔");   //疲劳
+                        hgpsCarInfo.setProcessMode("□已短信告知驾驶员/  ☑ 已处理   □安全教育  □罚款");   //具体处理方式
+                        hgpsCarInfo.setData("有");    //有报警数据
+                        hgGpsCarDetails.setCarNumber(hgpsCarInfo.getCarNumber());
+                        hgGpsCarDetails.setCarName(hgpsCarInfo.getDriverName());
+                        hgGpsCarDetails.setType("疲劳驾驶");
+                        hgGpsCarDetails.setTime(alarms.getJSONObject(alarms.size()-1).getStr("bTimeStr"));//报警时间
+                        hgGpsCarDetails.setSps(alarms.getJSONObject(alarms.size()-1).getStr("sps")); //报警地点
+                        hgGpsCarDetails.setSpeed(alarms.getJSONObject(alarms.size()-1).getInt("ssp")/10.0);//车速ssp
+                        hgGpsCarDetails.setWay("短信通知");  //处理方式
+                        hgGpsCarDetails.setStatus("发送成功"); //回执状态
+                        hgGpsCarDetails.setWayTime(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));  //处理时间
+                        hgGpsCarDetails.setNote("已对其进行批评教育责令改正");//备注
                     }
                 }
             } else {
-                gpsCarInfo.setData("无");    //无报警数据
+                hgpsCarInfo.setData("无");    //无报警数据
+                hgpsCarInfo.setProcessMode("□已短信告知驾驶员/  □ 已处理   □安全教育  □罚款");
             }
-            String sps = gspHttpUtil.get("/StandardApiAction_getDeviceStatus.action", map);   //获取车辆速度
+
+            String sps = gpsHttpUtil.get("/StandardApiAction_getDeviceStatus.action", map);   //获取车辆速度
             JSONObject json4 = JSONUtil.parseObj(sps);
             String statusStr = json4.getStr("status");
             if (JSONUtil.isJsonArray(statusStr)) {
                 JSONObject status = JSONUtil.parseArray(statusStr).getJSONObject(0);
                 String sp = status.getStr("sp");
                 if (sp != null) {     //速度内容不能为空
-                    gpsCarInfo.setSp(Integer.parseInt(sp) / 10.0);
+                    hgpsCarInfo.setSp(Integer.parseInt(sp) / 10.0);
                 }
             }
-            gpsCarInfos.add(gpsCarInfo);
+            hgpsCarInfos.add(hgpsCarInfo);   //添加一条司机信息到ArrayList集合中
+            hgpsCarDetails.add(hgGpsCarDetails);  //添加一条每日详细
         }
-        this.mongoTemplate.insertAll(gpsCarInfos);   //将所有司机的gps信息插入到数据库
+        this.mongoTemplate.insertAll(hgpsCarInfos);   //将所有回通司机的gps信息插入到数据库
+        this.mongoTemplate.insertAll(hgpsCarDetails);//将每日详细插入到数据库
     }
 
     @Test
-    public void getGpsCarInfo() throws Exception {
-        Criteria criteria = new Criteria();
-        criteria.orOperator(Criteria.where("time").exists(true), Criteria.where("time").is(""));   //time不为空的所有数据
+    public void getHGpsCarInfo() throws Exception {
+        String time = "2019-09-23";
+        Criteria criteria=Criteria.where("time").regex(".*?"+time+".*");
         Query query = new Query(criteria);
-        List<GpsCarInfo> gpsCarInfos = this.mongoTemplate.find(query, GpsCarInfo.class);
+        List<HGpsCarInfo> hGpsCarInfos = this.mongoTemplate.find(query, HGpsCarInfo.class);
+        long count= this.mongoTemplate.count(new Query(new Criteria().orOperator(Criteria.where("_class").exists(true))),HCarInfo.class);  //安装GPS的的数量
+        long count1 = this.mongoTemplate.count(new Query(Criteria.where("online").is("是")), HGpsCarInfo.class);//GPS在线数量
+        Iterator<HGpsCarInfo> iter= hGpsCarInfos.iterator();
+        int x=1;
+        while(iter.hasNext()){
+            HGpsCarInfo hGpsCarInfo = iter.next();
+            hGpsCarInfo.setNum(x++);
+        }
         Map<String, Object> map = new HashMap<>();
-        map.put("gpsCarInfos", gpsCarInfos);
+        map.put("hgpsCarInfos", hGpsCarInfos);
+        map.put("newDate", new SimpleDateFormat("yyyy年MM月dd日").format(new Date()));  //当天时间
+        map.put("total", count);   //GPS安装总台数
+        map.put("online", count1);  //GPS在线台数
+        map.put("noonlone", this.mongoTemplate.count(new Query(Criteria.where("online").is("否")),HGpsCarInfo.class));    //GPS不在线台数
+        // 创建一个数值格式化对象
+        NumberFormat numberFormat = NumberFormat.getInstance();
+        // 设置精确到小数点后1位
+        numberFormat.setMaximumFractionDigits(1);
+        String result = numberFormat.format((float) count1 / (float) count * 100) + "%";   //在线率计算
+        map.put("OnlineRate", result);
+
         // 模板路径和输出流
-        String templatePath = "E:\\jxls\\studentTemplate.xlsx";
-        OutputStream os = new FileOutputStream("E:\\jxls\\student.xls");
+       String templatePath = "E:\\jxls\\官厅运营车辆GPS监控平台监控管理台账.xls";
+       String excelName = "E:\\jxls\\" + new SimpleDateFormat("yyyy年MM月dd日").format(new Date()) + "官厅运营车辆GPS监控平台监控管理回通台账.xls";
+        OutputStream os = new FileOutputStream(excelName);
         //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出
         JxlsUtil.exportExcel(templatePath, os, map);
         os.close();
     }
+
     @Test
-    public   void  Excel() throws Exception {
-        List<Student> students = new ArrayList<>();
-        Student student = new Student();
-        student.setName("张三");
-        student.setGender("男");
-        student.setGradeClass("初一一班");
-        List<Course> courses = new ArrayList<>();
-        Course course = new Course();
-        course.setCourseName("语文");
-        course.setCourseScore("98");
-        courses.add(course);
-        course = new Course();
-        course.setCourseName("数学");
-        course.setCourseScore("105");
-        courses.add(course);
-        course = new Course();
-        course.setCourseName("物理");
-        course.setCourseScore("80");
-        courses.add(course);
+    public void insertJGpsCarInfo() {
+        this.mongoTemplate.dropCollection("jGpsCarInfo");
+        List<JCarInfo> carInfos = this.mongoTemplate.findAll(JCarInfo.class);   //查询出所有驾驶员数据
+        Iterator<JCarInfo> iter = carInfos.iterator();
+        List<JGpsCarInfo> jgpsCarInfos = new ArrayList<>();    //保存所有驾驶员的台账信息
+        while (iter.hasNext()) {
+            JCarInfo carInfo = iter.next();
+            JGpsCarInfo jgpsCarInfo = new JGpsCarInfo();
+            jgpsCarInfo.setCarNumber(carInfo.getCarNumber());   //车牌号
+            jgpsCarInfo.setDriverName(carInfo.getDriverName());  //驾驶员名字
+            jgpsCarInfo.setPhone(carInfo.getPhone());            //驾驶员电话
+            Map<String, Object> map = new HashMap<>();
+            map.put("devIdno", carInfo.getDeviceId());   //设备号
+            map.put("vehiIdno", carInfo.getCarNumber());  //车牌号
+            map.put("geoaddress", 1);//解析最新地理位置
+            String in = gpsHttpUtil.get("/StandardApiAction_vehicleStatus.action", map);//获取车辆最新位置
+            JSONObject json2 = JSONUtil.parseObj(in);
+            String infoStr = json2.getStr("infos");
+            if (JSONUtil.isJsonArray(infoStr)) {
+                JSONObject info = JSONUtil.parseArray(infoStr).getJSONObject(0);
+                if (info.getStr("pos") != "" && info.getStr("tm") != null) {   //判断返回的地理位置不能为空、最后在线时间不能为null
+                    jgpsCarInfo.setPos(info.getStr("pos"));          //地理位置
+                    if (new Date().getTime() - 85800000L <= info.getLong("tm") && info.getLong("tm") <= new Date().getTime()) {     //每晚23:50统计最后在线时间,当天时间范围00:00~23:50
+                        jgpsCarInfo.setTime(DateFormatUtil.simpleDate(info.getLong("tm")));   //当天最后在线时间
+                        jgpsCarInfo.setOnline("是");    //GPS在线
+                    } else {
+                        jgpsCarInfo.setOnline("否");   //GPS不在线
+                    }
+                }
+            }
+            if ("是".equals(jgpsCarInfo.getOnline()) && null == jgpsCarInfo.getPos()) {
+                jgpsCarInfo.setType("✔");    //GPS在线，但是返回时间为空，则车台故障
+            }
+            map.put("begintime", DateFormatUtil.simpleDate(new Date().getTime() - 85800000L));  //开始时间
+            map.put("endtime", DateFormatUtil.simpleDate(new Date().getTime()));       //结束时间
+            map.put("armType", "11,61,178,180,200,222,223,224,225,226,227,228,229,230,304,309,311,314,99,125,249,299,306,49,99,125,249,299,306,618,619"); //报警类型:  疲劳：49,99,125,249,299,306,618,619
+            map.put("pageRecords", 100);   //显示前100条记录                                                      //超速：11,61,178,180,200,222,223,224,225,226,227,228,229,230,304,309,311,314
+            map.put("toMap", 2);  //地图经纬度转换  2：百度地图解析可以解析出地址
+            String baoJin = gpsHttpUtil.get("/StandardApiAction_queryAlarmDetail.action", map); //获取设备超速、疲劳驾驶报警数据
+            JSONObject json3 = JSONUtil.parseObj(baoJin);
+            String alarmsStr = json3.getStr("alarms");
+            jgpsCarInfo.setTired("");     //无疲劳
+            jgpsCarInfo.setSpeed("");    //无超速
+            if (JSONUtil.isJsonArray(alarmsStr)) {
+                JSONArray alarms = JSONUtil.parseArray(alarmsStr);
+                for (int i = 0; i < alarms.size(); i++) {
+                    int atp = alarms.getJSONObject(i).getInt("atp");   //报警类型
+                    if (CollUtil.toList(11, 61, 178, 180, 200, 222, 223, 224, 225, 226, 227, 228, 229, 230, 304, 309, 311, 314).contains(atp)) {
+                        jgpsCarInfo.setSpeed("✔");   //超速
+                        jgpsCarInfo.setProcessMode("□已短信告知驾驶员/  ☑ 已处理   □安全教育  □罚款");   //具体处理方式
+                        jgpsCarInfo.setData("有");    //有报警数据
+                    }
+                    if (CollUtil.toList(49, 99, 125, 249, 299, 306, 618, 619).contains(atp)) {
+                        jgpsCarInfo.setTired("✔");   //疲劳
+                        jgpsCarInfo.setProcessMode("□已短信告知驾驶员/  ☑ 已处理   □安全教育  □罚款");   //具体处理方式
+                        jgpsCarInfo.setData("有");    //有报警数据
+                    }
+                }
+            } else {
+                jgpsCarInfo.setData("无");    //无报警数据
+                jgpsCarInfo.setProcessMode("□已短信告知驾驶员/  □ 已处理   □安全教育  □罚款");
+            }
 
-        student.setCourses(courses);
-        students.add(student);
+            String sps = gpsHttpUtil.get("/StandardApiAction_getDeviceStatus.action", map);   //获取车辆速度
+            JSONObject json4 = JSONUtil.parseObj(sps);
+            String statusStr = json4.getStr("status");
+            if (JSONUtil.isJsonArray(statusStr)) {
+                JSONObject status = JSONUtil.parseArray(statusStr).getJSONObject(0);
+                String sp = status.getStr("sp");
+                if (sp != null) {     //速度内容不能为空
+                    jgpsCarInfo.setSp(Integer.parseInt(sp) / 10.0);
+                }
+            }
+            jgpsCarInfos.add(jgpsCarInfo);   //添加一条司机信息到ArrayList集合中
+        }
+        this.mongoTemplate.insertAll(jgpsCarInfos);   //将所有回通司机的gps信息插入到数据库
+    }
+    @Test
+    public void getJGpsCarInfo() throws Exception {
+        String time = "2019-09-23";
+        Criteria criteria=Criteria.where("time").regex(".*?"+time+".*");
+        Query query = new Query(criteria);
+        List<JGpsCarInfo> jGpsCarInfos = this.mongoTemplate.find(query, JGpsCarInfo.class);
+        long count= this.mongoTemplate.count(new Query(new Criteria().orOperator(Criteria.where("_class").exists(true))),JGpsCarInfo.class);  //安装GPS的的数量
+        long count1 = this.mongoTemplate.count(new Query(Criteria.where("online").is("是")), JGpsCarInfo.class);//GPS在线数量
+        Iterator<JGpsCarInfo> iter= jGpsCarInfos.iterator();
+        int x=1;
+        while(iter.hasNext()){
+            JGpsCarInfo jGpsCarInfo = iter.next();
+            jGpsCarInfo.setNum(x++);
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put("hgpsCarInfos", jGpsCarInfos);
+        map.put("newDate", new SimpleDateFormat("yyyy年MM月dd日").format(new Date()));  //当天时间
+        map.put("total", count);   //GPS安装总台数
+        map.put("online", count1);  //GPS在线台数
+        map.put("noonlone", this.mongoTemplate.count(new Query(Criteria.where("online").is("否")),JGpsCarInfo.class));    //GPS不在线台数
+        // 创建一个数值格式化对象
+        NumberFormat numberFormat = NumberFormat.getInstance();
+        // 设置精确到小数点后1位
+        numberFormat.setMaximumFractionDigits(1);
+        String result = numberFormat.format((float) count1 / (float) count * 100) + "%";   //在线率计算
+        map.put("OnlineRate", result);
 
-
-        student = new Student();
-        student.setName("王丽丽");
-        student.setGender("女");
-        student.setGradeClass("初一二班");
-        courses = new ArrayList<>();
-        course = new Course();
-        course.setCourseName("语文");
-        course.setCourseScore("102");
-        courses.add(course);
-        course = new Course();
-        course.setCourseName("数学");
-        course.setCourseScore("110");
-        courses.add(course);
-        student.setCourses(courses);
-        students.add(student);
-
-        student = new Student();
-        student.setName("李梅");
-        student.setGender("女");
-        student.setGradeClass("初一三班");
-        courses = new ArrayList<>();
-        course = new Course();
-        course.setCourseName("语文");
-        course.setCourseScore("110");
-        courses.add(course);
-        course = new Course();
-        course.setCourseName("数学");
-        course.setCourseScore("100");
-        courses.add(course);
-        course = new Course();
-        course.setCourseName("物理");
-        course.setCourseScore("85");
-        courses.add(course);
-        student.setCourses(courses);
-        students.add(student);
-        //模板里展示的数据
-        Map<String, Object> data = new HashMap<>();
-        data.put("students", students);
-        data.put("AAAA","握手");
-        System.out.println(data.get("students"));
         // 模板路径和输出流
-        String templatePath = "E:\\jxls\\studentTemplate.xls";
-        OutputStream os = new FileOutputStream("E:\\jxls\\student.xls");
+        String templatePath = "E:\\jxls\\官厅运营车辆GPS监控平台监控管理台账.xls";
+        String excelName = "E:\\jxls\\" + new SimpleDateFormat("yyyy年MM月dd日").format(new Date()) + "官厅运营车辆GPS监控平台监控管理锦通台账.xls";
+        OutputStream os = new FileOutputStream(excelName);
         //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出
-        JxlsUtil.exportExcel(templatePath, os, data);
+        JxlsUtil.exportExcel(templatePath, os, map);
+        os.close();
     }
 
+    @Test
+    public void getHGpsCarDetail()throws Exception {
+        String time = "2019-09-23";
+        Criteria criteria=Criteria.where("time").regex(".*?"+time+".*");
+        Query query = new Query(criteria);
+        List<HGpsCarDetails> hGpsCarDetails = this.mongoTemplate.find(query, HGpsCarDetails.class);
+       Iterator<HGpsCarDetails>  iter=hGpsCarDetails.iterator();
+       int n=1;
+       while(iter.hasNext()){
+          HGpsCarDetails   hGpsCarDetails1=iter.next();
+          hGpsCarDetails1.setNum(n++);
+       }
+        Map<String ,Object>  map=new HashMap<>();
+        map.put("hGpsCarDetails",hGpsCarDetails);
+        map.put("count",hGpsCarDetails.size());
+        map.put("iscount",hGpsCarDetails.size());
+        map.put("OnlineRate", "100%");
+        map.put("newDate", new SimpleDateFormat("yyyy年MM月dd日").format(new Date()));  //当天时间
+        // 模板路径和输出流
+        String templatePath = "E:\\jxls\\官厅报警处理明细回通.xlsx";
+        String excelName = "E:\\jxls\\" + new SimpleDateFormat("yyyy年MM月dd日").format(new Date()) + "官厅报警处理明细回通.xls";
+        OutputStream os = new FileOutputStream(excelName);
+        //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出
+        JxlsUtil.exportExcel(templatePath, os, map);
+        os.close();
+    }
+
+    @Test
+    public void getCarInfo() throws Exception {
+        List<HGpsCarInfo> gpsCarInfos = this.mongoTemplate.findAll(HGpsCarInfo.class);//车台故障的所有数据
+        Iterator<HGpsCarInfo> iterator = gpsCarInfos.iterator();
+        List<HGpsCarInfo> gpsCarInfos1 = new ArrayList<>();
+        int i = 0;
+        while (iterator.hasNext()) {
+            HGpsCarInfo gpsCarInfo = iterator.next();
+            gpsCarInfo.setNum(++i);
+            gpsCarInfos1.add(gpsCarInfo);
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put("gpsCarInfos", gpsCarInfos1);
+        map.put("newDate", new SimpleDateFormat("yyyy年MM月dd日").format(new Date()));  //当天时间
+        // 模板路径和输出流
+        String templatePath = "E:\\jxls\\官厅运营车辆GPS监控平台监控管理台账.xls";
+        String excelName = "E:\\jxls\\" + new SimpleDateFormat("yyyy年MM月dd日").format(new Date()) + "官厅运营车辆GPS监控平台监控管理台账.xls";
+        OutputStream os = new FileOutputStream(excelName);
+        //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出
+        JxlsUtil.exportExcel(templatePath, os, map);
+        os.close();
+
+    }
+
+    @Test
+    public void ExcelHT() throws Exception {
+        ExcelReader reader = ExcelUtil.getReader("C:\\Users\\gt\\Desktop\\车辆GPS在线排查表.xlsx");
+        List<Map<String, Object>> readAll = reader.readAll();
+        List<CarInfo> all = mongoTemplate.findAll(CarInfo.class);
+        List<HCarInfo> jCarInfos = new ArrayList<>();
+        for (int i = 0; i < readAll.size(); i++) {
+            HCarInfo jCarInfo = new HCarInfo();
+            Map<String, Object> map = readAll.get(i);
+            String carNumber = (String) map.get("车牌");
+              int z=0;
+            for (int x = 0; x < all.size(); x++) {
+                if (all.get(x).getCarNumber().equals(carNumber)) {
+                    jCarInfo.setDriverName(all.get(x).getDriverName());
+                    jCarInfo.setPhone(all.get(x).getPhone());
+                    jCarInfo.setCarNumber(all.get(x).getCarNumber());
+                    jCarInfo.setDeviceId(all.get(x).getDeviceId());
+                    jCarInfos.add(jCarInfo);
+                    z=1;
+                }
+            }
+            if(z==0){
+                System.err.println(carNumber);
+            }
+
+        }
+        System.out.println(jCarInfos.size());
+        this.mongoTemplate.insertAll(jCarInfos);
+    }
+
+    @Test
+    public void ExcelJT() throws Exception {
+        ExcelReader reader = ExcelUtil.getReader("C:\\Users\\gt\\Desktop\\锦通.xlsx");
+        List<Map<String, Object>> readAll = reader.readAll();
+        List<CarInfo> all = mongoTemplate.findAll(CarInfo.class);
+        for (int i = 0; i < readAll.size(); i++) {
+            Map<String, Object> map = readAll.get(i);
+            String carNumber = (String) map.get("车牌");
+            boolean flag = true;
+            for (int x = 0; x < all.size(); x++) {
+                if (all.get(x).getCarNumber().equals(carNumber)) {   //车牌号相同的
+                    if (null == all.get(x).getDriverName()) {   //没有姓名的驾驶员
+                        System.err.println(all.get(x));
+                    }
+                    flag = false;
+                }
+            }
+            if (flag) {      //没有驾驶员车牌号的
+                System.err.println(carNumber);
+            }
+        }
+    }
+    @Test
+    public void testJT() throws Exception {
+        Criteria criteria = new Criteria();
+        criteria.and("carNumber").is("云G76787");
+        Query query = new Query(criteria);
+        List<CarInfo> carInfos = mongoTemplate.find(query, CarInfo.class);
+        System.out.println(carInfos);
+    }
+    @Test
+    public void findHcarInfo(){
+        List<HCarInfo> all= this.mongoTemplate.findAll(HCarInfo.class);
+    }
+    @Test
+    public void findJcarInfo(){
+        List<JCarInfo> all= this.mongoTemplate.findAll(JCarInfo.class);
+    }
+    @Test
+    public  void editHcarInfo(){
+        HCarInfo  hCarInfo=this.mongoTemplate.findById("5d882f6b97a5823468281a41",HCarInfo.class);
+        System.out.println(hCarInfo);
+    }
+    @Test
+    public void inertHcarInfo(){
+        String carNumber="云A1111";
+        String driverName="高挺";
+        String phone="12344567";
+        Map<String ,Object>  map=new HashMap<>();
+        map.put("vehiIdno",carNumber);
+        String  result=gpsHttpUtil.get("/StandardApiAction_getDeviceByVehicle.action",map);
+        HCarInfo  hCarInfo=new HCarInfo();
+        hCarInfo.setDriverName(driverName);
+        this.mongoTemplate.insert(hCarInfo);
+    }
 }

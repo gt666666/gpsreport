@@ -1,14 +1,20 @@
 package com.ynzhongxi.gpsreport.pojo;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
- * by 罗毅涵
- * The 存储车辆基础数据
+ * 类描述：
+ * 创建作者：gt
+ * 创建日期 ： 2019/9/23
  */
 @Data
-public class GpsCarInfo {
+public class JGpsCarInfo   implements Serializable {
+    /**
+     * 序列号
+     **/
+    private Integer num;
 
     /**
      * 车牌号
@@ -42,18 +48,18 @@ public class GpsCarInfo {
     /**
      * 车台故障,GPS在线状态   1：车台故障  0：没有故障
      **/
-    private Integer type;
+    private String type;
     /**
      * 疲劳驾驶 1:表示疲劳驾驶
      **/
-    private Integer tired;
+    private String tired;
     /**
      * 超速 1：表示超速
      **/
-    private Integer speed;
+    private String speed;
 
     /**
-     *    是否有报警数据  ：有、无
+     * 是否有报警数据  ：有、无
      **/
     private String data;
 
@@ -62,7 +68,7 @@ public class GpsCarInfo {
      **/
     private String deviceId;
     /**
-     * MongoDb自动生成的唯一标识
-     */
-    private String id;
+     * 具体处理方式
+     **/
+    private String processMode;
 }

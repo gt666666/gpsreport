@@ -1,7 +1,7 @@
 package com.ynzhongxi.gpsreport.service;
 
 import com.ynzhongxi.gpsreport.dao.GpsCarInfoDao;
-import com.ynzhongxi.gpsreport.pojo.GpsCarInfo;
+import com.ynzhongxi.gpsreport.pojo.HGpsCarInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +27,7 @@ public class GpsCarInfoService {
      *
      * @param gpsCarInfo the gps car info
      */
-    public void saveCar(GpsCarInfo gpsCarInfo) {
+    public void saveCar(HGpsCarInfo gpsCarInfo) {
         gpsCarInfoDao.save(gpsCarInfo);
     }
 
@@ -40,7 +40,7 @@ public class GpsCarInfoService {
      * @param gpsCarInfo the gps car info
      * @return the list
      */
-    public List<GpsCarInfo> carList(GpsCarInfo gpsCarInfo) {
+    public List<HGpsCarInfo> carList(HGpsCarInfo gpsCarInfo) {
         return gpsCarInfoDao.queryList(gpsCarInfo);
     }
 }

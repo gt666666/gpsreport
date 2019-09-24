@@ -18,7 +18,7 @@ import java.util.Map;
  * 创建日期 ： 2019/9/4
  */
 @Component
-public class GspHttpUtil {
+public class GpsHttpUtil {
     @Resource
     RedisUtils redis;
     private final String BAST_URL = "http://60.161.53.204:8088";

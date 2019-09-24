@@ -7,7 +7,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
-import com.ynzhongxi.gpsreport.pojo.GpsCarInfo;
+import com.ynzhongxi.gpsreport.pojo.HGpsCarInfo;
 import com.ynzhongxi.gpsreport.service.GpsCarInfoService;
 import com.ynzhongxi.gpsreport.utils.Tools;
 import org.junit.Test;
@@ -50,14 +50,14 @@ public class GpsreportApplicationTests {
         ExcelReader readerw = ExcelUtil.getReader("C:/myfile/htw.xls");
         List<Map<String,Object>> readAllw = readerw.readAll();
         int number = 0;
-        GpsCarInfo carInfo;
+        HGpsCarInfo carInfo;
         for (int i =0; i < json.size(); i++) {
            JSONObject object = json.getJSONObject(i);
             String nm = object.getStr("nm");
 //            System.out.println(i+"车牌号：" + nm);
             String id = object.getJSONArray("dl").getJSONObject(0).getStr("id");
 //            System.out.println(i+"设备号i：" + id);
-            carInfo = new GpsCarInfo();
+            carInfo = new HGpsCarInfo();
             carInfo.setCarNumber(nm);
             carInfo.setDeviceId(id);
             //循环比对Excel数据
@@ -108,8 +108,8 @@ public class GpsreportApplicationTests {
 
     @Test
     public void getCArInformation() {
-        List<GpsCarInfo> gpsCarInfos = gpsCarInfoService.carList(new GpsCarInfo());
-        for (GpsCarInfo gpsCarInfo: gpsCarInfos){
+        List<HGpsCarInfo> gpsCarInfos = gpsCarInfoService.carList(new HGpsCarInfo());
+        for (HGpsCarInfo gpsCarInfo: gpsCarInfos){
             System.err.println(gpsCarInfo);
         }
     }
