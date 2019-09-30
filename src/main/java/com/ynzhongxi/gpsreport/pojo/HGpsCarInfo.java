@@ -70,4 +70,8 @@ public class HGpsCarInfo implements Serializable {
      * 具体处理方式
      **/
     private String processMode;
+    /**
+     * 导入数据月份
+     **/
+    private String  month;
 }

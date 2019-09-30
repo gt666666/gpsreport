@@ -4,7 +4,9 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 /**
  * 定义日期格式化字符串
@@ -63,5 +65,20 @@ public class DateFormatUtil {
     }
     public  static  String simpleDate(Long  time){
         return    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(time);
+    }
+    public static String  getCalendar(Date date){
+        SimpleDateFormat  sdf=new  SimpleDateFormat("yyyy年MM月dd日");
+        Calendar calendar=new GregorianCalendar();
+        calendar.setTime(date);
+        calendar.add(calendar.DATE,-1);
+        return  sdf.format(calendar.getTime());
+    }
+    public static  String  getYearMonth(Date date){
+        SimpleDateFormat format = new SimpleDateFormat("yyyy年MM月");
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        calendar.add(Calendar.MONTH, -1);
+        Date mdate = calendar.getTime();
+        return  format.format(mdate);
     }
 }

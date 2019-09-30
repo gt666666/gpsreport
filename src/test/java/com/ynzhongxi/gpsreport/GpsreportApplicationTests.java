@@ -8,7 +8,7 @@ import cn.hutool.json.JSONUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import com.ynzhongxi.gpsreport.pojo.HGpsCarInfo;
-import com.ynzhongxi.gpsreport.service.GpsCarInfoService;
+import com.ynzhongxi.gpsreport.service.HGpsCarInfoService;
 import com.ynzhongxi.gpsreport.utils.Tools;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +23,7 @@ import java.util.Map;
 public class GpsreportApplicationTests {
 
     @Autowired
-    private GpsCarInfoService gpsCarInfoService;
+    private HGpsCarInfoService gpsCarInfoService;
 
     @Test
     public void contextLoads() {

@@ -10,7 +10,7 @@ import java.io.Serializable;
  * 创建日期 ： 2019/9/23
  */
 @Data
-public class JGpsCarInfo   implements Serializable {
+public class JGpsCarInfo implements Serializable {
     /**
      * 序列号
      **/
@@ -71,4 +71,8 @@ public class JGpsCarInfo   implements Serializable {
      * 具体处理方式
      **/
     private String processMode;
+    /**
+     * 数据月份
+     **/
+    private String month;
 }

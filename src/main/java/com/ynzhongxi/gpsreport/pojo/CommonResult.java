@@ -22,8 +22,7 @@ public class CommonResult {
         this.msg = "";
         this.data = null;
     }
-
-    public CommonResult(boolean success, String msg) {
+    public CommonResult(boolean success, String msg){
         this.code = success ? SUCCESS : FAILS;
         this.msg = msg;
         this.data = null;

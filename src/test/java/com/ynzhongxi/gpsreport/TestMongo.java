@@ -7,8 +7,10 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import com.ynzhongxi.gpsreport.component.RedisUtils;
 import com.ynzhongxi.gpsreport.pojo.*;
+import com.ynzhongxi.gpsreport.service.HGpsCarInfoService;
 import com.ynzhongxi.gpsreport.utils.DateFormatUtil;
 import com.ynzhongxi.gpsreport.utils.GpsHttpUtil;
 import com.ynzhongxi.gpsreport.utils.JxlsUtil;
@@ -19,13 +21,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import javax.annotation.Resource;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import java.io.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.security.Principal;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -46,6 +55,8 @@ public class TestMongo extends BaseSpringBootTest {
     private GpsHttpUtil gpsHttpUtil;
     @Autowired
     private MongoTemplate mongoTemplate;
+    @Autowired
+    private HGpsCarInfoService hGpsCarInfoService;
     @Resource
     RedisUtils redis;
 
@@ -94,7 +105,7 @@ public class TestMongo extends BaseSpringBootTest {
         List<HCarInfo> carInfos = this.mongoTemplate.findAll(HCarInfo.class);   //查询出所有驾驶员数据
         Iterator<HCarInfo> iter = carInfos.iterator();
         List<HGpsCarInfo> hgpsCarInfos = new ArrayList<>();    //保存所有驾驶员的台账信息
-        List<HGpsCarDetails> hgpsCarDetails=new ArrayList<>();    //全部每日处理详细表
+        List<HGpsCarDetails> hgpsCarDetails = new ArrayList<>();    //全部每日处理详细表
         while (iter.hasNext()) {
             HCarInfo carInfo = iter.next();
             HGpsCarInfo hgpsCarInfo = new HGpsCarInfo();
@@ -133,9 +144,9 @@ public class TestMongo extends BaseSpringBootTest {
             String alarmsStr = json3.getStr("alarms");
             hgpsCarInfo.setTired("");     //无疲劳
             hgpsCarInfo.setSpeed("");    //无超速
-            HGpsCarDetails  hgGpsCarDetails=null;
+            HGpsCarDetails hgGpsCarDetails = null;
             if (JSONUtil.isJsonArray(alarmsStr)) {
-                 hgGpsCarDetails=new HGpsCarDetails();//  每日处理详细表
+                hgGpsCarDetails = new HGpsCarDetails();//  每日处理详细表
                 JSONArray alarms = JSONUtil.parseArray(alarmsStr);
                 for (int i = 0; i < alarms.size(); i++) {
                     int atp = alarms.getJSONObject(i).getInt("atp");   //报警类型
@@ -146,9 +157,9 @@ public class TestMongo extends BaseSpringBootTest {
                         hgGpsCarDetails.setCarNumber(hgpsCarInfo.getCarNumber());
                         hgGpsCarDetails.setCarName(hgpsCarInfo.getDriverName());
                         hgGpsCarDetails.setType("超速报警");
-                        hgGpsCarDetails.setTime(alarms.getJSONObject(alarms.size()-1).getStr("bTimeStr"));//报警时间
-                        hgGpsCarDetails.setSps(alarms.getJSONObject(alarms.size()-1).getStr("sps")); //报警地点
-                        hgGpsCarDetails.setSpeed(alarms.getJSONObject(alarms.size()-1).getInt("ssp")/10.0);//车速ssp
+                        hgGpsCarDetails.setTime(alarms.getJSONObject(alarms.size() - 1).getStr("bTimeStr"));//报警时间
+                        hgGpsCarDetails.setSps(alarms.getJSONObject(alarms.size() - 1).getStr("sps")); //报警地点
+                        hgGpsCarDetails.setSpeed(alarms.getJSONObject(alarms.size() - 1).getInt("ssp") / 10.0);//车速ssp
                         hgGpsCarDetails.setWay("短信通知");  //处理方式
                         hgGpsCarDetails.setStatus("发送成功"); //回执状态
                         hgGpsCarDetails.setWayTime(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));  //处理时间
@@ -161,9 +172,9 @@ public class TestMongo extends BaseSpringBootTest {
                         hgGpsCarDetails.setCarNumber(hgpsCarInfo.getCarNumber());
                         hgGpsCarDetails.setCarName(hgpsCarInfo.getDriverName());
                         hgGpsCarDetails.setType("疲劳驾驶");
-                        hgGpsCarDetails.setTime(alarms.getJSONObject(alarms.size()-1).getStr("bTimeStr"));//报警时间
-                        hgGpsCarDetails.setSps(alarms.getJSONObject(alarms.size()-1).getStr("sps")); //报警地点
-                        hgGpsCarDetails.setSpeed(alarms.getJSONObject(alarms.size()-1).getInt("ssp")/10.0);//车速ssp
+                        hgGpsCarDetails.setTime(alarms.getJSONObject(alarms.size() - 1).getStr("bTimeStr"));//报警时间
+                        hgGpsCarDetails.setSps(alarms.getJSONObject(alarms.size() - 1).getStr("sps")); //报警地点
+                        hgGpsCarDetails.setSpeed(alarms.getJSONObject(alarms.size() - 1).getInt("ssp") / 10.0);//车速ssp
                         hgGpsCarDetails.setWay("短信通知");  //处理方式
                         hgGpsCarDetails.setStatus("发送成功"); //回执状态
                         hgGpsCarDetails.setWayTime(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));  //处理时间
@@ -195,14 +206,14 @@ public class TestMongo extends BaseSpringBootTest {
     @Test
     public void getHGpsCarInfo() throws Exception {
         String time = "2019-09-23";
-        Criteria criteria=Criteria.where("time").regex(".*?"+time+".*");
+        Criteria criteria = Criteria.where("time").regex(".*?" + time + ".*");
         Query query = new Query(criteria);
         List<HGpsCarInfo> hGpsCarInfos = this.mongoTemplate.find(query, HGpsCarInfo.class);
-        long count= this.mongoTemplate.count(new Query(new Criteria().orOperator(Criteria.where("_class").exists(true))),HCarInfo.class);  //安装GPS的的数量
+        long count = this.mongoTemplate.count(new Query(new Criteria().orOperator(Criteria.where("_class").exists(true))), HCarInfo.class);  //安装GPS的的数量
         long count1 = this.mongoTemplate.count(new Query(Criteria.where("online").is("是")), HGpsCarInfo.class);//GPS在线数量
-        Iterator<HGpsCarInfo> iter= hGpsCarInfos.iterator();
-        int x=1;
-        while(iter.hasNext()){
+        Iterator<HGpsCarInfo> iter = hGpsCarInfos.iterator();
+        int x = 1;
+        while (iter.hasNext()) {
             HGpsCarInfo hGpsCarInfo = iter.next();
             hGpsCarInfo.setNum(x++);
         }
@@ -211,7 +222,7 @@ public class TestMongo extends BaseSpringBootTest {
         map.put("newDate", new SimpleDateFormat("yyyy年MM月dd日").format(new Date()));  //当天时间
         map.put("total", count);   //GPS安装总台数
         map.put("online", count1);  //GPS在线台数
-        map.put("noonlone", this.mongoTemplate.count(new Query(Criteria.where("online").is("否")),HGpsCarInfo.class));    //GPS不在线台数
+        map.put("noonlone", this.mongoTemplate.count(new Query(Criteria.where("online").is("否")), HGpsCarInfo.class));    //GPS不在线台数
         // 创建一个数值格式化对象
         NumberFormat numberFormat = NumberFormat.getInstance();
         // 设置精确到小数点后1位
@@ -220,8 +231,8 @@ public class TestMongo extends BaseSpringBootTest {
         map.put("OnlineRate", result);
 
         // 模板路径和输出流
-       String templatePath = "E:\\jxls\\官厅运营车辆GPS监控平台监控管理台账.xls";
-       String excelName = "E:\\jxls\\" + new SimpleDateFormat("yyyy年MM月dd日").format(new Date()) + "官厅运营车辆GPS监控平台监控管理回通台账.xls";
+        String templatePath = "E:\\jxls\\官厅运营车辆GPS监控平台监控管理台账.xls";
+        String excelName = "E:\\jxls\\" + new SimpleDateFormat("yyyy年MM月dd日").format(new Date()) + "官厅运营车辆GPS监控平台监控管理回通台账.xls";
         OutputStream os = new FileOutputStream(excelName);
         //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出
         JxlsUtil.exportExcel(templatePath, os, map);
@@ -306,17 +317,18 @@ public class TestMongo extends BaseSpringBootTest {
         }
         this.mongoTemplate.insertAll(jgpsCarInfos);   //将所有回通司机的gps信息插入到数据库
     }
+
     @Test
     public void getJGpsCarInfo() throws Exception {
         String time = "2019-09-23";
-        Criteria criteria=Criteria.where("time").regex(".*?"+time+".*");
+        Criteria criteria = Criteria.where("time").regex(".*?" + time + ".*");
         Query query = new Query(criteria);
         List<JGpsCarInfo> jGpsCarInfos = this.mongoTemplate.find(query, JGpsCarInfo.class);
-        long count= this.mongoTemplate.count(new Query(new Criteria().orOperator(Criteria.where("_class").exists(true))),JGpsCarInfo.class);  //安装GPS的的数量
+        long count = this.mongoTemplate.count(new Query(new Criteria().orOperator(Criteria.where("_class").exists(true))), JGpsCarInfo.class);  //安装GPS的的数量
         long count1 = this.mongoTemplate.count(new Query(Criteria.where("online").is("是")), JGpsCarInfo.class);//GPS在线数量
-        Iterator<JGpsCarInfo> iter= jGpsCarInfos.iterator();
-        int x=1;
-        while(iter.hasNext()){
+        Iterator<JGpsCarInfo> iter = jGpsCarInfos.iterator();
+        int x = 1;
+        while (iter.hasNext()) {
             JGpsCarInfo jGpsCarInfo = iter.next();
             jGpsCarInfo.setNum(x++);
         }
@@ -325,7 +337,7 @@ public class TestMongo extends BaseSpringBootTest {
         map.put("newDate", new SimpleDateFormat("yyyy年MM月dd日").format(new Date()));  //当天时间
         map.put("total", count);   //GPS安装总台数
         map.put("online", count1);  //GPS在线台数
-        map.put("noonlone", this.mongoTemplate.count(new Query(Criteria.where("online").is("否")),JGpsCarInfo.class));    //GPS不在线台数
+        map.put("noonlone", this.mongoTemplate.count(new Query(Criteria.where("online").is("否")), JGpsCarInfo.class));    //GPS不在线台数
         // 创建一个数值格式化对象
         NumberFormat numberFormat = NumberFormat.getInstance();
         // 设置精确到小数点后1位
@@ -343,21 +355,21 @@ public class TestMongo extends BaseSpringBootTest {
     }
 
     @Test
-    public void getHGpsCarDetail()throws Exception {
+    public void getHGpsCarDetail() throws Exception {
         String time = "2019-09-23";
-        Criteria criteria=Criteria.where("time").regex(".*?"+time+".*");
+        Criteria criteria = Criteria.where("time").regex(".*?" + time + ".*");
         Query query = new Query(criteria);
         List<HGpsCarDetails> hGpsCarDetails = this.mongoTemplate.find(query, HGpsCarDetails.class);
-       Iterator<HGpsCarDetails>  iter=hGpsCarDetails.iterator();
-       int n=1;
-       while(iter.hasNext()){
-          HGpsCarDetails   hGpsCarDetails1=iter.next();
-          hGpsCarDetails1.setNum(n++);
-       }
-        Map<String ,Object>  map=new HashMap<>();
-        map.put("hGpsCarDetails",hGpsCarDetails);
-        map.put("count",hGpsCarDetails.size());
-        map.put("iscount",hGpsCarDetails.size());
+        Iterator<HGpsCarDetails> iter = hGpsCarDetails.iterator();
+        int n = 1;
+        while (iter.hasNext()) {
+            HGpsCarDetails hGpsCarDetails1 = iter.next();
+            hGpsCarDetails1.setNum(n++);
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put("hGpsCarDetails", hGpsCarDetails);
+        map.put("count", hGpsCarDetails.size());
+        map.put("iscount", hGpsCarDetails.size());
         map.put("OnlineRate", "100%");
         map.put("newDate", new SimpleDateFormat("yyyy年MM月dd日").format(new Date()));  //当天时间
         // 模板路径和输出流
@@ -403,7 +415,7 @@ public class TestMongo extends BaseSpringBootTest {
             HCarInfo jCarInfo = new HCarInfo();
             Map<String, Object> map = readAll.get(i);
             String carNumber = (String) map.get("车牌");
-              int z=0;
+            int z = 0;
             for (int x = 0; x < all.size(); x++) {
                 if (all.get(x).getCarNumber().equals(carNumber)) {
                     jCarInfo.setDriverName(all.get(x).getDriverName());
@@ -411,10 +423,10 @@ public class TestMongo extends BaseSpringBootTest {
                     jCarInfo.setCarNumber(all.get(x).getCarNumber());
                     jCarInfo.setDeviceId(all.get(x).getDeviceId());
                     jCarInfos.add(jCarInfo);
-                    z=1;
+                    z = 1;
                 }
             }
-            if(z==0){
+            if (z == 0) {
                 System.err.println(carNumber);
             }
 
@@ -445,6 +457,7 @@ public class TestMongo extends BaseSpringBootTest {
             }
         }
     }
+
     @Test
     public void testJT() throws Exception {
         Criteria criteria = new Criteria();
@@ -453,29 +466,182 @@ public class TestMongo extends BaseSpringBootTest {
         List<CarInfo> carInfos = mongoTemplate.find(query, CarInfo.class);
         System.out.println(carInfos);
     }
+
     @Test
-    public void findHcarInfo(){
-        List<HCarInfo> all= this.mongoTemplate.findAll(HCarInfo.class);
+    public void findHcarInfo() {
+        List<HCarInfo> all = this.mongoTemplate.findAll(HCarInfo.class);
     }
+
     @Test
-    public void findJcarInfo(){
-        List<JCarInfo> all= this.mongoTemplate.findAll(JCarInfo.class);
+    public void findJcarInfo() {
+        List<JCarInfo> all = this.mongoTemplate.findAll(JCarInfo.class);
     }
+
     @Test
-    public  void editHcarInfo(){
-        HCarInfo  hCarInfo=this.mongoTemplate.findById("5d882f6b97a5823468281a41",HCarInfo.class);
+    public void editHcarInfo() {
+        HCarInfo hCarInfo = this.mongoTemplate.findById("5d882f6b97a5823468281a41", HCarInfo.class);
         System.out.println(hCarInfo);
     }
+
     @Test
-    public void inertHcarInfo(){
-        String carNumber="云A1111";
-        String driverName="高挺";
-        String phone="12344567";
-        Map<String ,Object>  map=new HashMap<>();
-        map.put("vehiIdno",carNumber);
-        String  result=gpsHttpUtil.get("/StandardApiAction_getDeviceByVehicle.action",map);
-        HCarInfo  hCarInfo=new HCarInfo();
-        hCarInfo.setDriverName(driverName);
-        this.mongoTemplate.insert(hCarInfo);
+    public void inertHcarInfo() {
+        ExcelReader reader = ExcelUtil.getReader("C:\\Users\\gt\\Desktop\\锦通82.xls");
+        List<Map<String, Object>> readAll = reader.readAll();
+        Iterator<Map<String, Object>> iter = readAll.iterator();
+        List<JCarInfo> hCarInfos = new ArrayList<JCarInfo>();
+        int n = 1;
+        while (iter.hasNext()) {
+            n++;
+            Map<String, Object> next = iter.next();
+            String carNumber = (String) next.get("车牌号");
+            String name = (String) next.get("联系人");
+            String phone = (String) next.get("联系人手机");
+            JCarInfo hCarInfo = new JCarInfo();
+            hCarInfo.setCarNumber(carNumber);
+            hCarInfo.setDriverName(name);
+            hCarInfo.setPhone(phone);
+            hCarInfos.add(hCarInfo);
+
+//            Map<String ,Object>  map=new HashMap<>();
+//            map.put("vehiIdno",carNumber);
+//            String  result=gpsHttpUtil.get("/StandardApiAction_getDeviceByVehicle.action",map);
+//            JSONObject jsonObj = JSONUtil.parseObj(result);
+//            int   i=jsonObj.getInt("result");
+//              if(i==8){
+//                 // System.err.println(carNumber);
+//              }
+//              if(i==18){
+//                  //System.err.println(n+"      "+carNumber);
+//              }
+//              if(i==0){
+//
+//              }
+
+        }
+        this.mongoTemplate.insertAll(hCarInfos);
+    }
+
+    @Test
+    public void inertcarInfo() {
+        List<JCarInfo> all = this.mongoTemplate.findAll(JCarInfo.class);
+        Iterator<JCarInfo> iterator = all.iterator();
+        while (iterator.hasNext()) {
+            JCarInfo next = iterator.next();
+            String carNumber = next.getCarNumber();
+            Criteria criteria = new Criteria();
+            criteria.and("carNumber").is(carNumber);
+            Query query = new Query(criteria);
+            List<CarInfo> carInfos = this.mongoTemplate.find(query, CarInfo.class);
+            Update update = new Update();
+            System.out.println(carInfos.size() > 0 ? carInfos.get(0).getDeviceId() : " ");
+            update.set("deviceId", carInfos.size() > 0 ? carInfos.get(0).getDeviceId() : " ");
+            // Criteria criteria1 = new Criteria();
+            // criteria.and("carNumber").is(carInfos.size()>0?carInfos.get(0).getCarNumber():" ");
+            Query query1 = new Query(Criteria.where("carNumber").is(carInfos.size() > 0 ? carInfos.get(0).getCarNumber() : " "));
+            System.out.println("****************" + this.mongoTemplate.updateFirst(query1, update, JCarInfo.class));
+
+        }
+    }
+
+    @Test
+    public void notNull() {
+        Criteria criteria = new Criteria();
+        criteria.orOperator(Criteria.where("driverName").exists(true));//不为空的所有数据
+        //criteria.orOperator(Criteria.where("driverName").exists(false);  //为空的所有数据
+        Query query = new Query(criteria);
+        List<JCarInfo> gpsCarInfos = mongoTemplate.find(query, JCarInfo.class);
+        Iterator<JCarInfo> iter = gpsCarInfos.iterator();
+        while (iter.hasNext()) {
+            JCarInfo next = iter.next();
+            System.out.println(next.getCarNumber());
+        }
+
+    }
+
+    @Test
+    public void findByCarNumber() {
+        Criteria criteria = new Criteria();
+        criteria.and("carNumber").is("云G71427");
+        Query query = new Query(criteria);
+        System.out.println(this.mongoTemplate.find(query, CarInfo.class));
+    }
+
+    @Test
+    public void getFiledName() {
+        String month = "2019-09";
+        Map<String, Object> map = new HashMap<>();
+        Criteria tcriteria = new Criteria();
+        tcriteria.and("time").regex(".*?" + month + ".*");
+        tcriteria.and("tired").is("✔");  //疲劳数据不为空
+        Query tquery = new Query(tcriteria);
+        long tcount = this.mongoTemplate.count(tquery, HGpsCarInfo.class);   //疲劳总量
+        map.put("tcount", tcount);
+        Criteria scriteria = new Criteria();
+        scriteria.and("time").regex(".*?" + month + ".*");
+        scriteria.and("speed").is("✔");   //超速数据不为空
+        Query squery = new Query(scriteria);
+        long scount = this.mongoTemplate.count(squery, HGpsCarInfo.class);   //超速总量
+        map.put("scount", scount);
+        Criteria ocriteria = new Criteria();
+        ocriteria.and("month").regex(".*?" + month + ".*");
+        ocriteria.and("online").is("是");
+        Query oquery = new Query(ocriteria);
+        long ocount = this.mongoTemplate.count(oquery, HGpsCarInfo.class);   //在线车辆总量
+        map.put("ocount", ocount);
+        Criteria ncriteria = new Criteria();
+        ncriteria.and("month").regex(".*?" + month + ".*");
+        Query nquery = new Query(ncriteria);
+        long ncount = this.mongoTemplate.count(nquery, HGpsCarInfo.class);   //每月总在线数量
+        System.out.println(ncount + "*****");
+        // 创建一个数值格式化对象
+        NumberFormat numberFormat = NumberFormat.getInstance();
+        // 设置精确到小数点后1位
+        numberFormat.setMaximumFractionDigits(1);
+        String ns = numberFormat.format((float) ocount / (float) ncount * 100) + "%";   //在线率计算
+        map.put("ns", ns);
+    }
+
+    @Test
+    public void testHGpsCarInfoService() {
+//        Criteria  criteria=new Criteria();
+////        criteria.and("wayTime").is("2019-09-29");
+////        Query  query=new Query(criteria);
+////        List<JGpsCarDetails> hGpsCarDetails = this.mongoTemplate.find(query, JGpsCarDetails.class);
+////        System.out.println(hGpsCarDetails);
+        HGpsCarDetails hGpsCarDetails = new HGpsCarDetails();
+        hGpsCarDetails.setTime("2019-09-29");
+        String time = "2019-09-29";
+        Criteria criteria = Criteria.where("time").regex(".*?" + time + ".*");
+        Query query = new Query(criteria);
+        List<HGpsCarDetails> hGpsCarDetailss = this.mongoTemplate.find(query, HGpsCarDetails.class);
+        System.out.println(hGpsCarDetailss);
+        // Page<HGpsCarDetails> hGpsCarDetail = this.hGpsCarInfoService.getHGpsCarDetail(hGpsCarDetails, 1, 10);
+        //System.out.println(hGpsCarDetail);
+    }
+
+    @Test
+    public void testSimpleDateFormat() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(new Date());
+        calendar.add(calendar.DATE, -1);
+        String date = sdf.format(calendar.getTime());
+        System.out.println(date);
+    }
+
+    @Test
+    public void testSimpleDateMonth() {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.MONTH, -1);
+        Date date = calendar.getTime();
+        String mdate = format.format(date);
+        System.out.println(mdate);
+    }
+    @Test
+    public  void testRealPath( )throws   Exception{
+        File file = new File("doc/报警处理明细.xlsx");
+        System.out.println(file);
     }
 }

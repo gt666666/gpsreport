@@ -52,7 +52,7 @@ public abstract class BaseMongoDbDao<T> {
     public List<T> queryList(T object) {
         Query query = getQueryByObject(object);
         log.info(">>> MongoDB find start，{}", query.toString());
-        return mongoTemplate.find(query, this.getEntityClass());
+        return this.mongoTemplate.find(query, this.getEntityClass());
     }
 
     /**
@@ -88,11 +88,22 @@ public abstract class BaseMongoDbDao<T> {
     }
 
     /***
+     * 根据条件object查询库中符合条件的记录数量
+     */
+    public Long getLikeCount(T object) {
+        Query query = getQueryLikeByObject(object);
+        log.info(">>> MongoDB Count start，{}", query.toString());
+        return this.mongoTemplate.count(query, this.getEntityClass());
+    }
+
+    /***
      * 删除对象t
      */
     public int delete(T t) {
-        log.info(">>> MongoDB delete start，{}", t);
-        return (int) this.mongoTemplate.remove(t).getDeletedCount();
+        Query query = this.getQueryByObject(t);
+        log.info(">>> MongoDB delete start，{}", query.toString());
+        int i = (int) this.mongoTemplate.remove(query, this.getEntityClass()).getDeletedCount();
+        return   i;
     }
 
     /**
@@ -104,7 +115,7 @@ public abstract class BaseMongoDbDao<T> {
         T obj = this.mongoTemplate.findOne(query, this.getEntityClass());
         log.info(">>> MongoDB deleteById start，{}", query.toString());
         if (obj != null) {
-            return this.delete(obj);
+            return(int )this.mongoTemplate.remove(query,this.getEntityClass()).getDeletedCount();
         }
         return 0;
     }
@@ -112,8 +123,8 @@ public abstract class BaseMongoDbDao<T> {
     /**
      * 修改匹配到srcObj的第一条记录为targetObj
      */
-    public void updateFirst(T srcObj, T targetObj) {
-        Query query = getQueryByObject(srcObj);
+    public void updateFirst(String  carNumber ,T targetObj) {
+        Query  query=new Query(Criteria.where("carNumber").is(carNumber));
         Update update = getUpdateByObject(targetObj);
         log.info(">>> MongoDB updateFirst start，{}", query.toString());
         this.mongoTemplate.updateFirst(query, update, this.getEntityClass());
@@ -142,7 +153,7 @@ public abstract class BaseMongoDbDao<T> {
     /**
      * 将查询object条件对象转换为query
      */
-    private Query getQueryByObject(T object) {
+    public Query getQueryByObject(T object) {
         Query query = new Query();
         String[] fileds = getFiledName(object);
         Criteria criteria = new Criteria();
@@ -150,6 +161,23 @@ public abstract class BaseMongoDbDao<T> {
             Object filedValue = getFieldValueByName(filedName, object);
             if (filedValue != null) {
                 criteria.and(filedName).is(filedValue);
+            }
+        });
+        query.addCriteria(criteria);
+        return query;
+    }
+
+    /**
+     * 将查询object条件对象转换为query及逆行模糊查询
+     **/
+    public Query getQueryLikeByObject(T object) {
+        Query query = new Query();
+        String[] fileds = getFiledName(object);
+        Criteria criteria = new Criteria();
+        Arrays.stream(fileds).forEach(filedName -> {
+            Object filedValue = getFieldValueByName(filedName, object);
+            if (filedValue != null) {
+                criteria.and(filedName).regex(".*?" + filedValue + ".*");
             }
         });
         query.addCriteria(criteria);

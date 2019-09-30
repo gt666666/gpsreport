@@ -3,7 +3,6 @@ package com.ynzhongxi.gpsreport.pojo;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.PageUtil;
 import lombok.Data;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +30,11 @@ public class Page<T> implements Serializable {
      * @param data     当前分页数据
      */
     public Page(int page, int pageSize, long total, List<T> data) {
-        this.total = (total <= 0 ? 0 : total);
-        this.page = (page <= 0 ? 0 : page);
-        this.pageSize = (pageSize <= 0 ? DEFAULT_PAGE_SIZE : pageSize);
-        this.totalPage = PageUtil.totalPage(Convert.toInt(this.total), this.pageSize);
-        this.code = (data == null || data.isEmpty() ? 0 : 200);
-        this.data = (data == null ? new ArrayList<>() : data);
+        this.total = (total <= 0 ? 0 : total);    //总条数
+        this.page = (page <= 0 ? 0 : page);      //第几页
+        this.pageSize = (pageSize <= 0 ? DEFAULT_PAGE_SIZE : pageSize);    //一页多少条
+        this.totalPage = PageUtil.totalPage(Convert.toInt(this.total), this.pageSize);    //总页数
+        this.code = (data == null || data.isEmpty() ? 0 : 200);   //   是否有数据
+        this.data = (data == null ? new ArrayList<>() : data);     //查询到的数据
     }
 }
