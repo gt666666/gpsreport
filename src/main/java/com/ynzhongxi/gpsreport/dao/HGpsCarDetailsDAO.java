@@ -26,32 +26,35 @@ public class HGpsCarDetailsDAO extends BaseMongoDbDao<HGpsCarDetails> {
         return HGpsCarDetails.class;
     }
 
-    public List<HGpsCarDetails> getPage(String time, int page, int size) {
-//        int[] startEnd = PageUtil.transToStartEnd(page, size);
+    public List<HGpsCarDetails> getPage(String time, int page, int pageSize) {
+       int[] startEnd = PageUtil.transToStartEnd(page, pageSize);
 //        Query query = super.getQueryLikeByObject(hGpsCarDetails);
-//        query.skip(startEnd[0]);
-//        query.limit(size);
         Query query = new Query();
+        query.skip(startEnd[0]);
+        query.limit(pageSize);
         Criteria criteria = Criteria.where("time").regex(".*?" + time + ".*");
         query.addCriteria(criteria);
         return this.mongoTemplate.find(query, this.getEntityClass());
     }
-    public List<HGpsCarDetails> getPageDetails(int page, int size) {
+
+    public List<HGpsCarDetails> getPageDetails(int page, int pageSize) {
+        int[] startEnd = PageUtil.transToStartEnd(page, pageSize);
         Query query = new Query();
-        query.skip(page);
-        query.limit(size);
+        query.skip(startEnd[0]);
+        query.limit(pageSize);
         return this.mongoTemplate.find(query, this.getEntityClass());
     }
+
     public Long getDetalisLikeCount() {
         long count = this.mongoTemplate.count(new Query(new Criteria().orOperator(Criteria.where("_id").exists(true))), HGpsCarDetails.class);
-        return  count;
+        return count;
     }
 
-    public Long getLikeCount(String  time) {
+    public Long getLikeCount(String time) {
         Query query = new Query();
         Criteria criteria = Criteria.where("time").regex(".*?" + time + ".*");
         query.addCriteria(criteria);
         long count = this.mongoTemplate.count(query, HGpsCarDetails.class);
-        return  count;
+        return count;
     }
 }

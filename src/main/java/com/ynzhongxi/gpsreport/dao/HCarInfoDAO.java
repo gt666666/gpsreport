@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
  * 创建日期 ： 2019/9/29
  */
 @Component
-public class HCarInfoDao extends BaseMongoDbDao<HCarInfo> {
+public class HCarInfoDAO extends BaseMongoDbDao<HCarInfo> {
     @Override
     protected Class<HCarInfo> getEntityClass() {
         return HCarInfo.class;

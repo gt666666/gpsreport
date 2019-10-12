@@ -13,6 +13,7 @@ import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -70,10 +71,12 @@ public abstract class BaseMongoDbDao<T> {
      * @param size  查询大小
      */
     public List<T> getPage(T object, int page, int size) {
+        Sort sort = new Sort(Sort.Direction.DESC, "_id");   //查出数据，按时间降序
         int[] startEnd = PageUtil.transToStartEnd(page, size);
         Query query = getQueryByObject(object);
         query.skip(startEnd[0]);
         query.limit(size);
+        query.with(sort);
         log.info(">>> MongoDB queryPage start，{}", query.toString());
         return this.mongoTemplate.find(query, this.getEntityClass());
     }
@@ -103,7 +106,7 @@ public abstract class BaseMongoDbDao<T> {
         Query query = this.getQueryByObject(t);
         log.info(">>> MongoDB delete start，{}", query.toString());
         int i = (int) this.mongoTemplate.remove(query, this.getEntityClass()).getDeletedCount();
-        return   i;
+        return i;
     }
 
     /**
@@ -115,7 +118,7 @@ public abstract class BaseMongoDbDao<T> {
         T obj = this.mongoTemplate.findOne(query, this.getEntityClass());
         log.info(">>> MongoDB deleteById start，{}", query.toString());
         if (obj != null) {
-            return(int )this.mongoTemplate.remove(query,this.getEntityClass()).getDeletedCount();
+            return (int) this.mongoTemplate.remove(query, this.getEntityClass()).getDeletedCount();
         }
         return 0;
     }
@@ -123,8 +126,8 @@ public abstract class BaseMongoDbDao<T> {
     /**
      * 修改匹配到srcObj的第一条记录为targetObj
      */
-    public void updateFirst(String  carNumber ,T targetObj) {
-        Query  query=new Query(Criteria.where("carNumber").is(carNumber));
+    public void updateFirst(String carNumber, T targetObj) {
+        Query query = new Query(Criteria.where("carNumber").is(carNumber));
         Update update = getUpdateByObject(targetObj);
         log.info(">>> MongoDB updateFirst start，{}", query.toString());
         this.mongoTemplate.updateFirst(query, update, this.getEntityClass());

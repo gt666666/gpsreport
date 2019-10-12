@@ -1,10 +1,7 @@
 package com.ynzhongxi.gpsreport.service;
 
-import com.ynzhongxi.gpsreport.dao.HCarInfoDao;
-import com.ynzhongxi.gpsreport.dao.JCarInfoDao;
-import com.ynzhongxi.gpsreport.pojo.HCarInfo;
+import com.ynzhongxi.gpsreport.dao.JCarInfoDAO;
 import com.ynzhongxi.gpsreport.pojo.JCarInfo;
-import com.ynzhongxi.gpsreport.pojo.JGpsCarInfo;
 import com.ynzhongxi.gpsreport.pojo.Page;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +16,7 @@ import java.util.List;
 @Service
 public class JCarInfoService {
     @Resource
-    private JCarInfoDao jCarInfoDao;
+    private JCarInfoDAO jCarInfoDao;
 
     public void editByCarNumber(JCarInfo jCarInfo) {
         this.jCarInfoDao.updateFirst(jCarInfo);

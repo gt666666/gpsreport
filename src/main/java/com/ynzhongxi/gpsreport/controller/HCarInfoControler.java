@@ -21,7 +21,6 @@ public class HCarInfoControler extends BaseController {
     @Autowired
     private HCarInfoService hCarInfoService;
 
-
     /**
      * <p>方法名称：Edit by car number common result.</p >
      * <p>详细描述：. 修改司机信息</p >
@@ -54,8 +53,8 @@ public class HCarInfoControler extends BaseController {
      */
     @GetMapping("/carInfoList")
     public Page<HCarInfo> listCarInfo(HCarInfo hCarInfo,
-                                      @RequestParam(name = "page",required = false,defaultValue = "1") int page,
-                                      @RequestParam(name="limit" , required=false  ,defaultValue="10") int pageSize) {
+                                      @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+                                      @RequestParam(name = "limit", required = false, defaultValue = "10") int pageSize) {
         return this.hCarInfoService.listCarInfo(hCarInfo, page, pageSize);
     }
 
@@ -71,7 +70,8 @@ public class HCarInfoControler extends BaseController {
      * @author "gaoting"
      */
     @GetMapping("/carInfoById")
-    public HCarInfo carInfoById(String  id) {
+    public HCarInfo carInfoById(String id) {
+        System.out.println();
         return this.hCarInfoService.carInfoById(id);
     }
 
@@ -106,9 +106,9 @@ public class HCarInfoControler extends BaseController {
      * @return the common result
      * @author "gaoting"
      */
-    @PostMapping("insertHCarInfo")
-    public  CommonResult   insertHCarInfo(HCarInfo  hCarInfo){
-          this.hCarInfoService.insertHCarInfo(hCarInfo);
+    @PostMapping("/insertHCarInfo")
+    public CommonResult insertHCarInfo(HCarInfo hCarInfo) {
+        this.hCarInfoService.insertHCarInfo(hCarInfo);
         return resultWrapper(ResultEnum.SUCCESS);
     }
 

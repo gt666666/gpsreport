@@ -33,6 +33,7 @@ public enum ResultEnum {
     ERROR_NO_EXIST(2008, "记录不存在"),
     ERROR_NO_ALREADY(2009, "记录已存在"),
     ERROR_LOCK_PWD(2010, "锁定密码错误"),
+    ERROR_NO_LOGIN(2011, "未登录，请登录"),
 
     /******* 5000 ~ 9999 为验证类信息，以 VERIFY_ 开头 ******/
     VERIFY_ID_EMPTY(5000, "记录id不能为空"),

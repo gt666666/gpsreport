@@ -16,11 +16,9 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
+import javax.xml.ws.RequestWrapper;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.text.FieldPosition;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -157,13 +155,12 @@ public class HGpsCarInfoContorller extends BaseController {
     }
 
     @GetMapping("/getByTimeHGpsCarInfo")
-    public void getByTimeHGpsCarInfo() throws  Exception {
-        String time = "2019-09-29";
+    public void getByTimeHGpsCarInfo(String time) throws Exception {
         Criteria criteria = Criteria.where("month").regex(".*?" + time + ".*");
         Query query = new Query(criteria);
         List<HGpsCarInfo> hGpsCarInfos = this.mongoTemplate.find(query, HGpsCarInfo.class);
-        long count = this.mongoTemplate.count(new Query(new Criteria().orOperator(Criteria.where("_id").exists(true))), HGpsCarInfo.class);  //安装GPS的的数量
-        long count1 = this.mongoTemplate.count(new Query(Criteria.where("online").is("是")), HGpsCarInfo.class);//GPS在线数量
+        long count = this.mongoTemplate.count(query, HGpsCarInfo.class);  //安装GPS的的数量
+        long count1 = this.mongoTemplate.count(new Query(Criteria.where("online").is("是").and("month").is(time)), HGpsCarInfo.class);//GPS在线数量
         Iterator<HGpsCarInfo> iter = hGpsCarInfos.iterator();
         int x = 1;
         while (iter.hasNext()) {
@@ -175,7 +172,7 @@ public class HGpsCarInfoContorller extends BaseController {
         }
         Map<String, Object> map = new HashMap<>();
         map.put("gpsCarInfos", hGpsCarInfos);
-        map.put("newDate", DateFormatUtil.getCalendar(new Date()));  //当天时间
+        map.put("newDate", time);  //当天时间
         map.put("total", count);   //GPS安装总台数
         map.put("online", count1);  //GPS在线台数
         map.put("noonlone", count - count1);    //GPS不在线台数
@@ -188,13 +185,12 @@ public class HGpsCarInfoContorller extends BaseController {
         map.put("OnlineRate", result);
         // 模板路径和输出流
         String templatePath = "E:\\jxls\\运营车辆GPS监控平台监控管理台账.xls";
-        String excelName = "E:\\jxls\\" +DateFormatUtil.getCalendar(new Date())+ "回通运营车辆GPS监控平台监控管理回通台账.xls";
+        String excelName = "E:\\jxls\\" + time + "回通运营车辆GPS监控平台监控管理回通台账.xls";
 
-            OutputStream os = new FileOutputStream(excelName);
-            //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出
-            JxlsUtil.exportExcel(templatePath, os, map);
-            os.close();
-
+        OutputStream os = new FileOutputStream(excelName);
+        //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出
+        JxlsUtil.exportExcel(templatePath, os, map);
+        os.close();
     }
 
     @GetMapping("/getHGpsCarInfoByTimeList")
@@ -204,33 +200,40 @@ public class HGpsCarInfoContorller extends BaseController {
         return this.hGpsCarInfoService.getListHGpsCarInfo(hGpsCarInfo, page, pageSize);
     }
 
-    @GetMapping("/getHMonthCount")
-    public void getHMonthCount(String month) throws Exception {
+    @GetMapping("/getHMonthCountExport")
+    public void getHMonthCountExport(String month) throws Exception {
         Map<String, Object> map = this.hGpsCarInfoService.getHMonthCount(month);
         // 模板路径和输出流
         String templatePath = "E:\\jxls\\月季度运营车辆GPS监控平台监控管理台账.xlsx";
-        String excelName = "E:\\jxls\\" + DateFormatUtil.getYearMonth(new Date())+ "回通月季度运营车辆GPS监控平台监控管理台账.xls";
+        String excelName = "E:\\jxls\\" + month + "回通月季度运营车辆GPS监控平台监控管理台账.xls";
 
         OutputStream os = new FileOutputStream(excelName);
         //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出
         JxlsUtil.exportExcel(templatePath, os, map);
         os.close();
     }
-    @GetMapping("/getHGpsCarDetailByTime")
-    public Page<HGpsCarDetails>  getHGpsCarDetailByTime(String  time ,
-                                 @RequestParam(name = "page", required = false, defaultValue = "1") int page,
-                                 @RequestParam(name = "limit", required = false, defaultValue = "10") int pageSize){
-         return   this.hGpsCarInfoService.getHGpsCarDetailByTime(time,page,pageSize);
+
+    @GetMapping("/getHMonthCount")
+    public Map<String, Object> getHMonthCount(@RequestParam(name = "month", required = false, defaultValue = "") String month) throws Exception {
+        Map<String, Object> map = this.hGpsCarInfoService.getHMonthCount(month);
+        return map;
     }
+
+    @GetMapping("/getHGpsCarDetailByTime")
+    public Page<HGpsCarDetails> getHGpsCarDetailByTime(@RequestParam(name = "time", required = false, defaultValue = "") String time,
+                                                       @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+                                                       @RequestParam(name = "limit", required = false, defaultValue = "10") int pageSize) {
+        return this.hGpsCarInfoService.getHGpsCarDetailByTime(time, page, pageSize);
+    }
+
     @GetMapping("/getHGpsCarDetail")
-    public Page<HGpsCarDetails>  getHGpsCarDetail(@RequestParam(name = "page", required = false, defaultValue = "1") int page,
-                                                  @RequestParam(name = "limit", required = false, defaultValue = "10") int pageSize){
-        return   this.hGpsCarInfoService.getHGpsCarDetail(page,pageSize);
+    public Page<HGpsCarDetails> getHGpsCarDetail(@RequestParam(name = "page", required = false, defaultValue = "1") int page,
+                                                 @RequestParam(name = "limit", required = false, defaultValue = "10") int pageSize) {
+        return this.hGpsCarInfoService.getHGpsCarDetail(page, pageSize);
     }
 
     @GetMapping("/exportHGpsCarDetail")
-    public void exportHGpsCarDetail(String times)throws  Exception {
-        String time = "2019-09-29";
+    public void exportHGpsCarDetail(String time) throws Exception {
         Criteria criteria = Criteria.where("time").regex(".*?" + time + ".*");
         Query query = new Query(criteria);
         List<HGpsCarDetails> hGpsCarDetails = this.mongoTemplate.find(query, HGpsCarDetails.class);
@@ -245,15 +248,14 @@ public class HGpsCarInfoContorller extends BaseController {
         map.put("count", hGpsCarDetails.size());
         map.put("iscount", hGpsCarDetails.size());
         map.put("OnlineRate", "100%");
-        map.put("newDate",DateFormatUtil.getCalendar(new Date()));  //当天时间
+        map.put("newDate", time);  //当天时间
         map.put("name", "回通");
         // 模板路径和输出流
         String templatePath = "E:\\jxls\\报警处理明细.xlsx";
-        String excelName = "E:\\jxls\\" + DateFormatUtil.getCalendar(new Date())+ "回通报警处理明细回通.xls";
-
-            OutputStream os = new FileOutputStream(excelName);
-            //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出
-            JxlsUtil.exportExcel(templatePath, os, map);
-            os.close();
+        String excelName = "E:\\jxls\\" +time + "回通报警处理明细回通.xls";
+        OutputStream os = new FileOutputStream(excelName);
+        //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出
+        JxlsUtil.exportExcel(templatePath, os, map);
+        os.close();
     }
 }

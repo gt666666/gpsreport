@@ -3,12 +3,12 @@ spring:
 
   data:
     mongodb:
-      host: 192.168.2.88
+      host: 127.0.0.1
       database: pgsReport
 
   redis:
-    host: 192.168.2.88
-    password: Redis_kmzx@1234
+    host: 127.0.0.1
+    password:
 
 logging:
   level:

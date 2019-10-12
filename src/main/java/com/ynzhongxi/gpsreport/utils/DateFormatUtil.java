@@ -81,4 +81,8 @@ public class DateFormatUtil {
         Date mdate = calendar.getTime();
         return  format.format(mdate);
     }
+    public  static   String  getDate(Date  data){
+       String  sdf=new SimpleDateFormat("yyyy-MM-dd").format(data);
+        return  sdf;
+    }
 }

@@ -17,37 +17,44 @@ import java.util.List;
  * 创建日期 ： 2019/9/29
  */
 @Component
-public class JGpsCarDetailsDAO extends  BaseMongoDbDao<JGpsCarDetails> {
+public class JGpsCarDetailsDAO extends BaseMongoDbDao<JGpsCarDetails> {
     @Autowired
-    private MongoTemplate  mongoTemplate;
+    private MongoTemplate mongoTemplate;
+
     @Override
     protected Class<JGpsCarDetails> getEntityClass() {
         return JGpsCarDetails.class;
     }
-    public List<JGpsCarDetails> getPage(String  time, int page, int size) {
-//        int[] startEnd = PageUtil.transToStartEnd(page, size);
+
+    public List<JGpsCarDetails> getPage(String time, int page, int pageSize) {
+        int[] startEnd = PageUtil.transToStartEnd(page, pageSize);
 //        Query query = super.getQueryLikeByObject(jGpsCarDetails);
-//        query.skip(startEnd[0]);
-//        query.limit(size);
         Query query = new Query();
+        query.skip(startEnd[0]);
+        query.limit(pageSize);
         Criteria criteria = Criteria.where("time").regex(".*?" + time + ".*");
         query.addCriteria(criteria);
-      return this.mongoTemplate.find(query, this.getEntityClass());
-    }
-    public Long getLikeCount(String  time) {
-        Query query = new Query();
-        Criteria criteria = Criteria.where("time").regex(".*?" + time + ".*");
-        query.addCriteria(criteria);
-        return     this.mongoTemplate.count(query,HGpsCarDetails.class);
-    }
-    public List<JGpsCarDetails> getPageDetails(int page, int size) {
-        Query query = new Query();
-        query.skip(page);
-        query.limit(size);
         return this.mongoTemplate.find(query, this.getEntityClass());
     }
+
+    public Long getLikeCount(String time) {
+        Query query = new Query();
+        Criteria criteria = Criteria.where("time").regex(".*?" + time + ".*");
+        query.addCriteria(criteria);
+        return this.mongoTemplate.count(query, this.getEntityClass());
+    }
+
+    public List<JGpsCarDetails> getPageDetails(int page, int pageSize) {
+        int[] startEnd = PageUtil.transToStartEnd(page, pageSize);
+//        Query query = super.getQueryLikeByObject(hGpsCarDetails);
+        Query query = new Query();
+        query.skip(startEnd[0]);
+        query.limit(pageSize);
+        return this.mongoTemplate.find(query, this.getEntityClass());
+    }
+
     public Long getDetalisLikeCount() {
-        long count = this.mongoTemplate.count(new Query(new Criteria().orOperator(Criteria.where("_id").exists(true))), HGpsCarDetails.class);
-        return  count;
+        long count = this.mongoTemplate.count(new Query(new Criteria().orOperator(Criteria.where("_id").exists(true))), this.getEntityClass());
+        return count;
     }
 }

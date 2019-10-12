@@ -1,6 +1,7 @@
 package com.ynzhongxi.gpsreport;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.PageUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -640,8 +641,24 @@ public class TestMongo extends BaseSpringBootTest {
         System.out.println(mdate);
     }
     @Test
-    public  void testRealPath( )throws   Exception{
-        File file = new File("doc/报警处理明细.xlsx");
-        System.out.println(file);
+    public  void testRealPath( ){
+        int page=2;
+        int pageSize=10;
+        int[] startEnd = PageUtil.transToStartEnd(page, pageSize);
+        Query query = new Query();
+        query.skip(startEnd[0]);
+        query.limit(pageSize);
+        System.out.println(this.mongoTemplate.find(query, HGpsCarDetails.class));
+    }
+    @Test
+    public  void  insert(){
+        Member  member=new Member();
+        member.setUserName("htgsss");
+        member.setPassword("000000");
+        Criteria  criteria=new Criteria();
+        criteria.and("userName").is("htgsss").and("password").is("000000");
+        Query  query=new Query(criteria);
+        Member members = this.mongoTemplate.findOne(query, Member.class);
+        System.out.println(members);
     }
 }

@@ -45,7 +45,7 @@ public class JCarInfoControler extends BaseController {
         return resultWrapper(ResultEnum.ERROR);
     }
 
-    @PostMapping("insertJCarInfo")
+    @PostMapping("/insertJCarInfo")
     public CommonResult insertJCarInfo(JCarInfo jCarInfo) {
         this.jCarInfoService.insertJCarInfo(jCarInfo);
         return super.resultWrapper(ResultEnum.SUCCESS);

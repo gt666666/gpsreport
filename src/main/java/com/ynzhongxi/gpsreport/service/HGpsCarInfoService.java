@@ -1,7 +1,7 @@
 package com.ynzhongxi.gpsreport.service;
 
 import com.ynzhongxi.gpsreport.dao.HGpsCarDetailsDAO;
-import com.ynzhongxi.gpsreport.dao.HGpsCarInfoDao;
+import com.ynzhongxi.gpsreport.dao.HGpsCarInfoDAO;
 import com.ynzhongxi.gpsreport.pojo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,14 +16,14 @@ import java.util.Map;
 @Service
 public class HGpsCarInfoService {
     @Autowired
-    private final HGpsCarInfoDao gpsCarInfoDao;
+    private final HGpsCarInfoDAO gpsCarInfoDao;
     @Autowired
-    private HGpsCarInfoDao hGpsCarInfoDao;
+    private HGpsCarInfoDAO hGpsCarInfoDao;
     @Autowired
     private HGpsCarDetailsDAO hGpsCarDetailsDAO;
 
     @Autowired
-    public HGpsCarInfoService(HGpsCarInfoDao gpsCarInfoDao) {
+    public HGpsCarInfoService(HGpsCarInfoDAO gpsCarInfoDao) {
         this.gpsCarInfoDao = gpsCarInfoDao;
     }
 
@@ -62,13 +62,14 @@ public class HGpsCarInfoService {
         return this.hGpsCarInfoDao.getHMonthCount(month);
     }
 
-    public Page<HGpsCarDetails> getHGpsCarDetailByTime(String  time, int page, int pageSize) {
+    public Page<HGpsCarDetails> getHGpsCarDetailByTime(String time, int page, int pageSize) {
         List<HGpsCarDetails> pageList = this.hGpsCarDetailsDAO.getPage(time, page, pageSize);
         Long count = hGpsCarDetailsDAO.getLikeCount(time);
         return new Page<>(page, pageSize, count, pageList);
     }
+
     public Page<HGpsCarDetails> getHGpsCarDetail(int page, int pageSize) {
-        List<HGpsCarDetails> pageList = this.hGpsCarDetailsDAO.getPageDetails( page, pageSize);
+        List<HGpsCarDetails> pageList = this.hGpsCarDetailsDAO.getPageDetails(page, pageSize);
         Long count = hGpsCarDetailsDAO.getDetalisLikeCount();
         return new Page<>(page, pageSize, count, pageList);
     }

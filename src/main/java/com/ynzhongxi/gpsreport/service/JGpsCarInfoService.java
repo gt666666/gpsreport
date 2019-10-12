@@ -1,8 +1,7 @@
 package com.ynzhongxi.gpsreport.service;
 
 import com.ynzhongxi.gpsreport.dao.JGpsCarDetailsDAO;
-import com.ynzhongxi.gpsreport.dao.JGpsCarInfoDao;
-import com.ynzhongxi.gpsreport.pojo.HGpsCarDetails;
+import com.ynzhongxi.gpsreport.dao.JGpsCarInfoDAO;
 import com.ynzhongxi.gpsreport.pojo.JGpsCarDetails;
 import com.ynzhongxi.gpsreport.pojo.JGpsCarInfo;
 import com.ynzhongxi.gpsreport.pojo.Page;
@@ -20,7 +19,7 @@ import java.util.Map;
 @Service
 public class JGpsCarInfoService {
     @Autowired
-    private JGpsCarInfoDao jGpsCarInfoDao;
+    private JGpsCarInfoDAO jGpsCarInfoDao;
     @Autowired
     private JGpsCarDetailsDAO jGpsCarDetailsDAO;
 
@@ -33,13 +32,15 @@ public class JGpsCarInfoService {
     public Map<String, Object> getJMonthCount(String month) {
         return this.jGpsCarInfoDao.getJMonthCount(month);
     }
-    public Page<JGpsCarDetails> getJGpsCarDetail(String  time, int page, int pageSize) {
+
+    public Page<JGpsCarDetails> getHGpsCarDetailByTime(String time, int page, int pageSize) {
         List<JGpsCarDetails> pageList = jGpsCarDetailsDAO.getPage(time, page, pageSize);
         Long count = jGpsCarDetailsDAO.getLikeCount(time);
         return new Page<>(page, pageSize, count, pageList);
     }
+
     public Page<JGpsCarDetails> getJGpsCarDetail(int page, int pageSize) {
-        List<JGpsCarDetails> pageList = this.jGpsCarDetailsDAO.getPageDetails( page, pageSize);
+        List<JGpsCarDetails> pageList = this.jGpsCarDetailsDAO.getPageDetails(page, pageSize);
         Long count = jGpsCarDetailsDAO.getDetalisLikeCount();
         return new Page<>(page, pageSize, count, pageList);
     }

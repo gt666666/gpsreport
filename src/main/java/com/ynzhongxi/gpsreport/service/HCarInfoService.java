@@ -1,10 +1,8 @@
 package com.ynzhongxi.gpsreport.service;
 
-import com.ynzhongxi.gpsreport.dao.HCarInfoDao;
-import com.ynzhongxi.gpsreport.dao.TestDao;
+import com.ynzhongxi.gpsreport.dao.HCarInfoDAO;
 import com.ynzhongxi.gpsreport.pojo.HCarInfo;
 import com.ynzhongxi.gpsreport.pojo.Page;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -20,7 +18,7 @@ import java.util.List;
 public class HCarInfoService {
 
     @Resource
-    private HCarInfoDao hCarInfoDao;
+    private HCarInfoDAO hCarInfoDao;
 
     public void editByCarNumber(HCarInfo hCarInfo) {
         this.hCarInfoDao.updateFirst(hCarInfo);
@@ -33,6 +31,7 @@ public class HCarInfoService {
     }
 
     public HCarInfo carInfoById(String  id) {
+        System.out.println("**************"+id);
         return this.hCarInfoDao.queryById(id);
     }
 

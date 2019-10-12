@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
  * 创建日期 ： 2019/9/29
  */
 @Component
-public class JCarInfoDao  extends BaseMongoDbDao<JCarInfo> {
+public class JCarInfoDAO extends BaseMongoDbDao<JCarInfo> {
     @Override
     protected Class<JCarInfo> getEntityClass() {
         return JCarInfo.class;
