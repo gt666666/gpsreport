@@ -241,7 +241,10 @@ public class JGpsCarInfoContorller {
     }
 
     @GetMapping("/exportJGpsCarDetail")
-    public void exportJGpsCarDetail(HttpServletResponse response, String time) throws IOException {
+    public void exportJGpsCarDetail(
+            HttpServletResponse response,
+            @RequestParam(name = "time") String time
+    ) throws IOException {
         Criteria criteria = Criteria.where("wayTime").regex(".*?" + time + ".*");
         Query query = new Query(criteria);
         List<JGpsCarDetails> jGpsCarDetails = this.mongoTemplate.find(query, JGpsCarDetails.class);
