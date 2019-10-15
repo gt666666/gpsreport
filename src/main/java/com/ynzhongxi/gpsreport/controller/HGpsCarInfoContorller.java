@@ -195,15 +195,12 @@ public class HGpsCarInfoContorller extends BaseController {
 
         // 模板输入流和输出流
         InputStream in = new ClassPathResource("doc/运营车辆GPS监控平台监控管理台账.xls").getStream();
-
         // 向response输出文件流，浏览器下载文件
         response.setContentType("application/x-download");
         response.setHeader("content-disposition", "attachment;filename=" + URLUtil.encode("回通运营车辆GPS监控平台监控管理回通台账.xls"));
         OutputStream out = response.getOutputStream();
-
         //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出
         JxlsUtil.exportExcel(in, out, map);
-
         //推出流+关闭流
         out.flush();
         response.flushBuffer();
