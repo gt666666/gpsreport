@@ -184,7 +184,7 @@ public class HGpsCarInfoContorller extends BaseController {
         String result = numberFormat.format((float) count1 / (float) count * 100) + "%";   //在线率计算
         map.put("OnlineRate", result);
         // 模板路径和输出流
-        String templatePath = "E:\\jxls\\运营车辆GPS监控平台监控管理台账.xls";
+        String templatePath = this.getClass().getResource("").getPath().substring(0,this.getClass().getResource("").getPath().indexOf("target"))+"src/main/resources/doc/运营车辆GPS监控平台监控管理台账.xls";
         String excelName = "E:\\jxls\\" + time + "回通运营车辆GPS监控平台监控管理回通台账.xls";
 
         OutputStream os = new FileOutputStream(excelName);
@@ -204,9 +204,9 @@ public class HGpsCarInfoContorller extends BaseController {
     public void getHMonthCountExport(String month) throws Exception {
         Map<String, Object> map = this.hGpsCarInfoService.getHMonthCount(month);
         // 模板路径和输出流
-        String templatePath = "E:\\jxls\\月季度运营车辆GPS监控平台监控管理台账.xlsx";
+        String templatePath =this.getClass().getResource("").getPath().substring(0,this.getClass().getResource("").getPath().indexOf("target"))+"src/main/resources/doc/月季度运营车辆GPS监控平台监控管理台账.xlsx";
+        //"E:\\jxls\\月季度运营车辆GPS监控平台监控管理台账.xlsx";
         String excelName = "E:\\jxls\\" + month + "回通月季度运营车辆GPS监控平台监控管理台账.xls";
-
         OutputStream os = new FileOutputStream(excelName);
         //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出
         JxlsUtil.exportExcel(templatePath, os, map);
@@ -251,7 +251,7 @@ public class HGpsCarInfoContorller extends BaseController {
         map.put("newDate", time);  //当天时间
         map.put("name", "回通");
         // 模板路径和输出流
-        String templatePath = "E:\\jxls\\报警处理明细.xlsx";
+        String templatePath = this.getClass().getResource("").getPath().substring(0,this.getClass().getResource("").getPath().indexOf("target"))+"src/main/resources/doc/报警处理明细.xlsx";
         String excelName = "E:\\jxls\\" +time + "回通报警处理明细回通.xls";
         OutputStream os = new FileOutputStream(excelName);
         //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出

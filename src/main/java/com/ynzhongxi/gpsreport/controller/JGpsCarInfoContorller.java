@@ -9,7 +9,6 @@ import com.ynzhongxi.gpsreport.service.JGpsCarInfoService;
 import com.ynzhongxi.gpsreport.utils.DateFormatUtil;
 import com.ynzhongxi.gpsreport.utils.GpsHttpUtil;
 import com.ynzhongxi.gpsreport.utils.JxlsUtil;
-import org.apache.xmlbeans.impl.jam.mutable.MPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -181,7 +180,7 @@ public class JGpsCarInfoContorller {
         String result = numberFormat.format((float) count1 / (float) count * 100) + "%";   //在线率计算
         map.put("OnlineRate", result);
         // 模板路径和输出流
-        String templatePath = "E:\\jxls\\运营车辆GPS监控平台监控管理台账.xls";
+        String templatePath = this.getClass().getResource("").getPath().substring(0,this.getClass().getResource("").getPath().indexOf("target"))+"src/main/resources/doc/运营车辆GPS监控平台监控管理台账.xls";
         String excelName = "E:\\jxls\\" + time + "锦通运营车辆GPS监控平台监控管理回通台账.xls";
         try {
             OutputStream os = new FileOutputStream(excelName);
@@ -204,7 +203,7 @@ public class JGpsCarInfoContorller {
     public void getJMonthCountExport(String month) {
         Map<String, Object> map = this.jGpsCarInfoService.getJMonthCount(month);
         // 模板路径和输出流
-        String templatePath = "E:\\jxls\\月季度运营车辆GPS监控平台监控管理台账.xlsx";
+        String templatePath = this.getClass().getResource("").getPath().substring(0,this.getClass().getResource("").getPath().indexOf("target"))+"src/main/resources/doc/月季度运营车辆GPS监控平台监控管理台账.xlsx";
         String excelName = "E:\\jxls\\" + month + "锦通月季度运营车辆GPS监控平台监控管理台账.xls";
         try {
             OutputStream os = new FileOutputStream(excelName);
@@ -255,7 +254,7 @@ public class JGpsCarInfoContorller {
         map.put("newDate", time);  //当天时间
         map.put("name", "锦通");
         // 模板路径和输出流
-        String templatePath = "E:\\jxls\\报警处理明细.xlsx";
+        String templatePath = this.getClass().getResource("").getPath().substring(0,this.getClass().getResource("").getPath().indexOf("target"))+"src/main/resources/doc/报警处理明细.xlsx";
         String excelName = "E:\\jxls\\" + time + "锦通报警处理明细锦通.xls";
         try {
             OutputStream os = new FileOutputStream(excelName);
