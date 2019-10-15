@@ -40,11 +40,6 @@ spring:
       port: 27017
       database: pgsReport
 
-logging:
-  level:
-    com.ynzhongxi.log: debug
-  file: E:/develop/logs/pgs_report/log.log
-
 ### 自定义属性 ###
 custom:
   web-name: 北斗主动安全云平台-报表

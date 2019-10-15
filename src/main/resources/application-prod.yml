@@ -8,12 +8,11 @@ spring:
   redis:
     # 服务地址
     host: 127.0.0.1
-    # 登录密码
-    password: Redis_kmzx@1234
+    password:
 
 logging:
   level:
     com:
       ynzhongxi:
         gpsreport: debug
-  file: /opt/logs/pgs_report/log.log
+  file: D:\\gpsReport\\logs\\log.log
