@@ -1,10 +1,7 @@
 package com.ynzhongxi.gpsreport.dao;
 
 import cn.hutool.core.util.PageUtil;
-import com.ynzhongxi.gpsreport.pojo.HCarInfo;
 import com.ynzhongxi.gpsreport.pojo.HGpsCarInfo;
-import com.ynzhongxi.gpsreport.utils.DateFormatUtil;
-import org.apache.xmlbeans.impl.jam.mutable.MPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -12,7 +9,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import java.text.NumberFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
