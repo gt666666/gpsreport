@@ -13,7 +13,6 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>gpsreport</name>
     <description>北斗主动安全云平台 报表</description>
-
     <properties>
         <java.version>1.8</java.version>
         <hutool.version>4.5.1</hutool.version>
@@ -108,9 +107,21 @@
 
     <build>
         <plugins>
-            <plugin>
+            <plugin>  <!--项目打包处理发布-->
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- 设置程序执行的主类 -->
+                    <mainClass>com.ynzhongxi.gpsreport.GpsreportApplication</mainClass>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <!-- 去除测试包 -->
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
