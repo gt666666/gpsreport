@@ -22,6 +22,10 @@ public class GpsHttpUtil {
     @Resource
     RedisUtils redis;
     private final String BAST_URL = "http://60.161.53.204:8088";
+    /**
+     * 正式库链接本地
+     */
+//    private final String BAST_URL = "http://127.0.0.1:8088";
 
     public String getJsession() {
         Map<String, Object> paramMap = new HashMap<>();
