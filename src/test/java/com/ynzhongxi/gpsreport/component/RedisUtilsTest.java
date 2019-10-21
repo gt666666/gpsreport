@@ -4,9 +4,6 @@ import com.ynzhongxi.gpsreport.BaseSpringBootTest;
 import org.junit.Test;
 
 import javax.annotation.Resource;
-
-import static org.junit.Assert.*;
-
 public class RedisUtilsTest extends BaseSpringBootTest {
     @Resource
     RedisUtils redis;

@@ -33,9 +33,9 @@ public class JGpsCarInfoService {
         return this.jGpsCarInfoDao.getJMonthCount(month);
     }
 
-    public Page<JGpsCarDetails> getHGpsCarDetailByTime(String time, int page, int pageSize) {
-        List<JGpsCarDetails> pageList = jGpsCarDetailsDAO.getPage(time, page, pageSize);
-        Long count = jGpsCarDetailsDAO.getLikeCount(time);
+    public Page<JGpsCarDetails> getHGpsCarDetailByTime(String time, int page, int pageSize,String type) {
+        List<JGpsCarDetails> pageList = jGpsCarDetailsDAO.getPage(time,type, page, pageSize);
+        Long count = jGpsCarDetailsDAO.getLikeCount(time,type);
         return new Page<>(page, pageSize, count, pageList);
     }
 

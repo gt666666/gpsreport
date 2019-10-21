@@ -67,14 +67,14 @@ public class DateFormatUtil {
         return    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(time);
     }
     public static String  getCalendar(Date date){
-        SimpleDateFormat  sdf=new  SimpleDateFormat("yyyy年MM月dd日");
+        SimpleDateFormat  sdf=new  SimpleDateFormat("yyyy-MM-dd");
         Calendar calendar=new GregorianCalendar();
         calendar.setTime(date);
         calendar.add(calendar.DATE,-1);
         return  sdf.format(calendar.getTime());
     }
     public static  String  getYearMonth(Date date){
-        SimpleDateFormat format = new SimpleDateFormat("yyyy年MM月");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
         Calendar calendar = new GregorianCalendar();
         calendar.setTime(date);
         calendar.add(Calendar.MONTH, -1);

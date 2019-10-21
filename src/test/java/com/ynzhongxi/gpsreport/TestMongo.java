@@ -468,7 +468,11 @@ public class TestMongo extends BaseSpringBootTest {
 
     @Test
     public void findJcarInfo() {
-        List<JCarInfo> all = this.mongoTemplate.findAll(JCarInfo.class);
+        HGpsCarInfo gpsCarInfo=new HGpsCarInfo();
+        gpsCarInfo.setCarNumber("云G69447");
+//        Page<HGpsCarInfo> listHGpsCarInfo = this.hGpsCarInfoService.getListHGpsCarInfo(gpsCarInfo, 1, 10);
+//        System.out.println(listHGpsCarInfo);
+        System.out.println(11);
     }
 
     @Test

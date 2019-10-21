@@ -26,20 +26,20 @@ public class JGpsCarDetailsDAO extends BaseMongoDbDao<JGpsCarDetails> {
         return JGpsCarDetails.class;
     }
 
-    public List<JGpsCarDetails> getPage(String time, int page, int pageSize) {
+    public List<JGpsCarDetails> getPage(String time,String type, int page, int pageSize) {
         int[] startEnd = PageUtil.transToStartEnd(page, pageSize);
 //        Query query = super.getQueryLikeByObject(jGpsCarDetails);
         Query query = new Query();
         query.skip(startEnd[0]);
         query.limit(pageSize);
-        Criteria criteria = Criteria.where("time").regex(".*?" + time + ".*");
+        Criteria criteria = Criteria.where("time").regex(".*?" + time + ".*").and("type").regex(".*?" + type + ".*");
         query.addCriteria(criteria);
         return this.mongoTemplate.find(query, this.getEntityClass());
     }
 
-    public Long getLikeCount(String time) {
+    public Long getLikeCount(String time,String type) {
         Query query = new Query();
-        Criteria criteria = Criteria.where("time").regex(".*?" + time + ".*");
+        Criteria criteria = Criteria.where("time").regex(".*?" + time + ".*").and("type").regex(".*?" + type + ".*");
         query.addCriteria(criteria);
         return this.mongoTemplate.count(query, this.getEntityClass());
     }

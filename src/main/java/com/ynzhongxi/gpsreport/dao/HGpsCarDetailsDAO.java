@@ -26,13 +26,13 @@ public class HGpsCarDetailsDAO extends BaseMongoDbDao<HGpsCarDetails> {
         return HGpsCarDetails.class;
     }
 
-    public List<HGpsCarDetails> getPage(String time, int page, int pageSize) {
+    public List<HGpsCarDetails> getPage(String time,String  type, int page, int pageSize) {
        int[] startEnd = PageUtil.transToStartEnd(page, pageSize);
 //        Query query = super.getQueryLikeByObject(hGpsCarDetails);
         Query query = new Query();
         query.skip(startEnd[0]);
         query.limit(pageSize);
-        Criteria criteria = Criteria.where("time").regex(".*?" + time + ".*");
+        Criteria criteria = Criteria.where("time").regex(".*?" + time + ".*").and("type").regex(".*?" + type + ".*");
         query.addCriteria(criteria);
         return this.mongoTemplate.find(query, this.getEntityClass());
     }
@@ -50,9 +50,9 @@ public class HGpsCarDetailsDAO extends BaseMongoDbDao<HGpsCarDetails> {
         return count;
     }
 
-    public Long getLikeCount(String time) {
+    public Long getLikeCount(String time,String  type) {
         Query query = new Query();
-        Criteria criteria = Criteria.where("time").regex(".*?" + time + ".*");
+        Criteria criteria = Criteria.where("time").regex(".*?" + time + ".*").and("type").regex(".*?" + type + ".*");
         query.addCriteria(criteria);
         long count = this.mongoTemplate.count(query, HGpsCarDetails.class);
         return count;
