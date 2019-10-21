@@ -26,7 +26,7 @@ public class ListInfoController {
 
     @RequestMapping(value = "/getListController")
     public List<String> getListController() {
-        File file = new File(property.getPgsCmsPath() + "\\doc");
+        File file = new File(property.getGpsCmsPath() + "\\doc");
         List<String> list = new ArrayList<>();
         File[] files = file.listFiles();
         for (File f : Objects.requireNonNull(files)) {

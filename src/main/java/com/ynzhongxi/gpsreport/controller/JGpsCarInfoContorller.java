@@ -196,7 +196,7 @@ public class JGpsCarInfoContorller {
         String result = numberFormat.format((float) count1 / (float) count * 100) + "%";   //在线率计算
         map.put("OnlineRate", result);
         InputStream in = new ClassPathResource("doc/运营车辆GPS监控平台监控管理台账.xls").getStream();
-        OutputStream os = new FileOutputStream(property.getPgsCmsPath() + "\\doc\\" + DateFormatUtil.getCalendar(new Date()) + "锦通运营车辆GPS监控平台监控管理台账.xls");
+        OutputStream os = new FileOutputStream(property.getGpsCmsPath() + "\\doc\\" + DateFormatUtil.getCalendar(new Date()) + "锦通运营车辆GPS监控平台监控管理台账.xls");
         //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出
         JxlsUtil.exportExcel(in, os, map);
     }
@@ -348,7 +348,7 @@ public class JGpsCarInfoContorller {
         map.put("name", "锦通");
         map.put("member", s[random.nextInt(2)]);
         InputStream in = new ClassPathResource("doc/报警处理明细.xlsx").getStream();
-        OutputStream os = new FileOutputStream(property.getPgsCmsPath() + "\\doc\\" + DateFormatUtil.getCalendar(new Date()) + "锦通报警处理明细.xls");
+        OutputStream os = new FileOutputStream(property.getGpsCmsPath() + "\\doc\\" + DateFormatUtil.getCalendar(new Date()) + "锦通报警处理明细.xls");
         //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出
         JxlsUtil.exportExcel(in, os, map);
     }
