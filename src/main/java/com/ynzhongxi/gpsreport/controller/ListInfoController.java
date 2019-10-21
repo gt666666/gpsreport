@@ -1,11 +1,14 @@
 package com.ynzhongxi.gpsreport.controller;
 
+import com.ynzhongxi.gpsreport.component.ConfigProperty;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 类描述：
@@ -14,17 +17,23 @@ import java.util.List;
  */
 @RestController
 public class ListInfoController {
+    private final ConfigProperty property;
+
+    @Autowired
+    public ListInfoController(ConfigProperty property) {
+        this.property = property;
+    }
 
     @RequestMapping(value = "/getListController")
-    public List<String> getListController(){
-        File   file=new File("D:"+File.separator+"WebStorm"+File.separator+"gps_cms"+File.separator+"doc");
-        List<String> list=new ArrayList<>();
+    public List<String> getListController() {
+        File file = new File(property.getPgsCmsPath() + "\\doc");
+        List<String> list = new ArrayList<>();
         File[] files = file.listFiles();
-        for (File f:files){
-            String str= f.toString();
+        for (File f : Objects.requireNonNull(files)) {
+            String str = f.toString();
             String substring = str.substring(str.indexOf("\\doc"));
             list.add(substring);
         }
-        return   list;
+        return list;
     }
 }
