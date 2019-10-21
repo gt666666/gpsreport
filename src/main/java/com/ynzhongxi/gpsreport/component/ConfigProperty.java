@@ -16,4 +16,5 @@ import org.springframework.stereotype.Component;
 @ToString
 public class ConfigProperty {
     private String webName;
+    private String pgsCmsPath;
 }

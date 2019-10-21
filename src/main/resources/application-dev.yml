@@ -17,4 +17,7 @@ logging:
         gpsreport: debug
   file: E:/develop/logs/pgs_report/log.log
 
+custom:
+  gps-cms-path: D:\\WebStorm\\gps_cms
+
 

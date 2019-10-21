@@ -6,6 +6,7 @@ import cn.hutool.core.util.URLUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.ynzhongxi.gpsreport.component.ConfigProperty;
 import com.ynzhongxi.gpsreport.pojo.HCarInfo;
 import com.ynzhongxi.gpsreport.pojo.HGpsCarDetails;
 import com.ynzhongxi.gpsreport.pojo.HGpsCarInfo;
@@ -46,6 +47,8 @@ public class HGpsCarInfoContorller extends BaseController {
     private GpsHttpUtil gpsHttpUtil;
     @Autowired
     private HGpsCarInfoService hGpsCarInfoService;
+    @Autowired
+    private ConfigProperty property;
 
     @Scheduled(cron = "0 50 23 ? * *")    //每晚23:50自动执行
     @GetMapping("/insertH")
@@ -163,6 +166,7 @@ public class HGpsCarInfoContorller extends BaseController {
         this.mongoTemplate.insertAll(hgpsCarInfos);   //将所有回通司机的gps信息插入到数据库
         this.mongoTemplate.insertAll(hgpsCarDetails);//将每日详细插入到数据库
     }
+
     @Scheduled(cron = "0 43 00 ? * *")    //每天00:43自动执行
     @GetMapping("/getByTimeHGpsCarInfoExport")
     public void getByTimeHGpsCarInfoExport() throws Exception {
@@ -170,7 +174,7 @@ public class HGpsCarInfoContorller extends BaseController {
         Query query = new Query(criteria);
         List<HGpsCarInfo> hGpsCarInfos = this.mongoTemplate.find(query, HGpsCarInfo.class);
         long count = this.mongoTemplate.count(query, HGpsCarInfo.class);  //安装GPS的的数量
-        long count1 = this.mongoTemplate.count(new Query(Criteria.where("online").is("是").and("month").is( DateFormatUtil.getCalendar(new Date()))), HGpsCarInfo.class);//GPS在线数量
+        long count1 = this.mongoTemplate.count(new Query(Criteria.where("online").is("是").and("month").is(DateFormatUtil.getCalendar(new Date()))), HGpsCarInfo.class);//GPS在线数量
         Iterator<HGpsCarInfo> iter = hGpsCarInfos.iterator();
         int x = 1;
         while (iter.hasNext()) {
@@ -195,14 +199,13 @@ public class HGpsCarInfoContorller extends BaseController {
         map.put("OnlineRate", result);
         // 模板输入流和输出流
         InputStream in = new ClassPathResource("doc/运营车辆GPS监控平台监控管理台账.xls").getStream();
-        String   ins="D:\\WebStorm\\gps_cms\\doc\\回通运营车辆GPS监控平台监控管理台账.xls";
-        OutputStream os = new FileOutputStream("D:\\WebStorm\\gps_cms\\doc\\"+ DateFormatUtil.getCalendar(new Date())+"回通运营车辆GPS监控平台监控管理台账.xls");
+        OutputStream os = new FileOutputStream(property.getPgsCmsPath() + "\\doc\\" + DateFormatUtil.getCalendar(new Date()) + "回通运营车辆GPS监控平台监控管理台账.xls");
         //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出
         JxlsUtil.exportExcel(in, os, map);
     }
 
     @GetMapping("/getByTimeHGpsCarInfo")
-    public void getByTimeHGpsCarInfo(HttpServletResponse response, @RequestParam(name = "time") String time,String  driverName,String  carNumber) throws Exception {
+    public void getByTimeHGpsCarInfo(HttpServletResponse response, @RequestParam(name = "time") String time, String driverName, String carNumber) throws Exception {
         Criteria criteria = Criteria.where("month").regex(".*?" + time + ".*").and("driverName").regex(".*?" + driverName + ".*").and("carNumber").regex(".*?" + carNumber + ".*");
         Query query = new Query(criteria);
         List<HGpsCarInfo> hGpsCarInfos = this.mongoTemplate.find(query, HGpsCarInfo.class);
@@ -235,7 +238,7 @@ public class HGpsCarInfoContorller extends BaseController {
         InputStream in = new ClassPathResource("doc/运营车辆GPS监控平台监控管理台账.xls").getStream();
         // 向response输出文件流，浏览器下载文件
         response.setContentType("application/x-download");
-        response.setHeader("content-disposition", "attachment;filename=" + URLUtil.encode(time+"回通运营车辆GPS监控平台监控管理台账.xls"));
+        response.setHeader("content-disposition", "attachment;filename=" + URLUtil.encode(time + "回通运营车辆GPS监控平台监控管理台账.xls"));
         OutputStream out = response.getOutputStream();
         //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出
         JxlsUtil.exportExcel(in, out, map);
@@ -259,7 +262,7 @@ public class HGpsCarInfoContorller extends BaseController {
         InputStream in = new ClassPathResource("doc/月季度运营车辆GPS监控平台监控管理台账.xlsx").getStream();
         // 向response输出文件流，浏览器下载文件
         response.setContentType("application/x-download");
-        response.setHeader("content-disposition", "attachment;filename=" + URLUtil.encode(month+"回通月季度运营车辆GPS监控平台监控管理台账.xls"));
+        response.setHeader("content-disposition", "attachment;filename=" + URLUtil.encode(month + "回通月季度运营车辆GPS监控平台监控管理台账.xls"));
         OutputStream out = response.getOutputStream();
         //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出
         JxlsUtil.exportExcel(in, out, map);
@@ -278,9 +281,9 @@ public class HGpsCarInfoContorller extends BaseController {
     public Page<HGpsCarDetails> getHGpsCarDetailByTime(@RequestParam(name = "time", required = false, defaultValue = "") String time,
                                                        @RequestParam(name = "page", required = false, defaultValue = "1") int page,
                                                        @RequestParam(name = "limit", required = false, defaultValue = "10") int pageSize,
-                                                       @RequestParam(name = "type", required = false, defaultValue = "") String  type) {
+                                                       @RequestParam(name = "type", required = false, defaultValue = "") String type) {
 
-        return this.hGpsCarInfoService.getHGpsCarDetailByTime(time, page, pageSize,type);
+        return this.hGpsCarInfoService.getHGpsCarDetailByTime(time, page, pageSize, type);
     }
 
     @GetMapping("/getHGpsCarDetail")
@@ -290,9 +293,9 @@ public class HGpsCarInfoContorller extends BaseController {
     }
 
     @GetMapping("/exportHGpsCarDetail")
-    public void exportHGpsCarDetail(HttpServletResponse response, @RequestParam(name = "time") String time,String type) throws Exception {
-        String  s[]={"罗平","李玉"};
-        Random  random=new Random();
+    public void exportHGpsCarDetail(HttpServletResponse response, @RequestParam(name = "time") String time, String type) throws Exception {
+        String s[] = {"罗平", "李玉"};
+        Random random = new Random();
         Criteria criteria = Criteria.where("wayTime").regex(".*?" + time + ".*").and("type").regex(".*?" + type + ".*");
         Query query = new Query(criteria);
         List<HGpsCarDetails> hGpsCarDetails = this.mongoTemplate.find(query, HGpsCarDetails.class);
@@ -309,13 +312,13 @@ public class HGpsCarInfoContorller extends BaseController {
         map.put("OnlineRate", "100%");
         map.put("newDate", time);  //当天时间
         map.put("name", "回通");
-        map.put("member",s[random.nextInt(2)]);
+        map.put("member", s[random.nextInt(2)]);
 
         // 模板输入流和输出流
         InputStream in = new ClassPathResource("doc/报警处理明细.xlsx").getStream();
         // 向response输出文件流，浏览器下载文件
         response.setContentType("application/x-download");
-        response.setHeader("content-disposition", "attachment;filename=" + URLUtil.encode(time+"回通报警处理明细.xls"));
+        response.setHeader("content-disposition", "attachment;filename=" + URLUtil.encode(time + "回通报警处理明细.xls"));
         OutputStream out = response.getOutputStream();
         //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出
         JxlsUtil.exportExcel(in, out, map);
@@ -323,12 +326,13 @@ public class HGpsCarInfoContorller extends BaseController {
         out.flush();
         response.flushBuffer();
     }
+
     @Scheduled(cron = "0 50 00 ? * *")    //每天00:50自动执行
     @GetMapping("/HGpsCarDetail")
     public void HGpsCarDetail() throws Exception {
         Criteria criteria = Criteria.where("wayTime").regex(".*?" + DateFormatUtil.getCalendar(new Date()) + ".*").and("type").is("疲劳驾驶");
-        String  s[]={"罗平","李玉"};
-        Random  random=new Random();
+        String s[] = {"罗平", "李玉"};
+        Random random = new Random();
         Query query = new Query(criteria);
         List<HGpsCarDetails> hGpsCarDetails = this.mongoTemplate.find(query, HGpsCarDetails.class);
         Iterator<HGpsCarDetails> iter = hGpsCarDetails.iterator();
@@ -342,12 +346,12 @@ public class HGpsCarInfoContorller extends BaseController {
         map.put("count", hGpsCarDetails.size());
         map.put("iscount", hGpsCarDetails.size());
         map.put("OnlineRate", "100%");
-        map.put("member",s[random.nextInt(2)]);
+        map.put("member", s[random.nextInt(2)]);
         map.put("newDate", DateFormatUtil.getCalendar(new Date()));  //当天时间
         map.put("name", "回通");
 
         InputStream in = new ClassPathResource("doc/报警处理明细.xlsx").getStream();
-        OutputStream os = new FileOutputStream("D:\\WebStorm\\gps_cms\\doc\\"+ DateFormatUtil.getCalendar(new Date())+"回通报警处理明细.xls");
+        OutputStream os = new FileOutputStream(property.getPgsCmsPath() + "\\doc\\" + DateFormatUtil.getCalendar(new Date()) + "回通报警处理明细.xls");
         //调用封装的工具类，传入模板路径，输出流，和装有数据的Map,按照模板导出
         JxlsUtil.exportExcel(in, os, map);
     }

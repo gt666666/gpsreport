@@ -16,3 +16,6 @@ logging:
       ynzhongxi:
         gpsreport: debug
   file: D:\\gpsReport\\logs\\log.log
+
+custom:
+  gps-cms-path: D:\\gpsReport\\gps_cms
