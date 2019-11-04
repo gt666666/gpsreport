@@ -17,4 +17,5 @@ import org.springframework.stereotype.Component;
 public class ConfigProperty {
     private String webName;
     private String gpsCmsPath;
+    private String gpsDataserviceHttp;
 }

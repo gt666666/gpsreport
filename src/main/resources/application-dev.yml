@@ -19,5 +19,6 @@ logging:
 
 custom:
   gps-cms-path: D:\\WebStorm\\gps_cms
+  gps-dataservice-http: http://60.161.53.204:8088
 
 
