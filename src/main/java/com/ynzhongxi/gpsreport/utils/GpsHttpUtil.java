@@ -7,6 +7,7 @@ import cn.hutool.json.JSONUtil;
 import com.ynzhongxi.gpsreport.component.ConfigProperty;
 import com.ynzhongxi.gpsreport.component.RedisUtils;
 import com.ynzhongxi.gpsreport.pojo.LogJsession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -21,24 +22,25 @@ import java.util.Map;
 @Component
 public class GpsHttpUtil {
     @Resource
-    RedisUtils redis;
+    private RedisUtils redis;
     @Resource
-    ConfigProperty prop;
-    private final String BAST_URL = prop.getGpsDataserviceHttp();
+    private ConfigProperty property;
 
     public String getJsession() {
+        String baseUrl = property.getGpsDataserviceHttp();
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("account", "htgs");
         paramMap.put("password", "000000");
-        String res = HttpUtil.post(BAST_URL + "/StandardApiAction_login.action", paramMap);
+        String res = HttpUtil.post(baseUrl + "/StandardApiAction_login.action", paramMap);
         LogJsession logsession = JSONUtil.toBean(res, LogJsession.class);
         return logsession.getJsession();
     }
 
     public String get(String url, Map<String, Object> param) {
+        String baseUrl = property.getGpsDataserviceHttp();
         Object jsession = redis.get("jsession");
         param.put("jsession", null == jsession ? "12345678" : jsession);
-        String result = HttpUtil.get(BAST_URL + url, param);
+        String result = HttpUtil.get(baseUrl + url, param);
         JSONObject object = JSONUtil.parseObj(result);
         if (object.containsKey("result")) {
             Integer code = object.getInt("result");
