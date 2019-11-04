@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.ynzhongxi.gpsreport.component.ConfigProperty;
 import com.ynzhongxi.gpsreport.component.RedisUtils;
 import com.ynzhongxi.gpsreport.pojo.LogJsession;
 import org.springframework.stereotype.Component;
@@ -21,11 +22,9 @@ import java.util.Map;
 public class GpsHttpUtil {
     @Resource
     RedisUtils redis;
-    private final String BAST_URL = "http://60.161.53.204:8088";
-    /**
-     * 正式库链接本地
-     */
-//    private final String BAST_URL = "http://127.0.0.1:8088";
+    @Resource
+    ConfigProperty prop;
+    private final String BAST_URL = prop.getGpsDataserviceHttp();
 
     public String getJsession() {
         Map<String, Object> paramMap = new HashMap<>();
@@ -41,7 +40,7 @@ public class GpsHttpUtil {
         param.put("jsession", null == jsession ? "12345678" : jsession);
         String result = HttpUtil.get(BAST_URL + url, param);
         JSONObject object = JSONUtil.parseObj(result);
-        if (object.containsKey("result")){
+        if (object.containsKey("result")) {
             Integer code = object.getInt("result");
             if (CollUtil.contains(CollUtil.toList(4, 5), code)) {
                 this.redis.set("jsession", this.getJsession());
