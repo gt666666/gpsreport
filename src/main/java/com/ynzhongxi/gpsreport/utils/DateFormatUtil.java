@@ -3,6 +3,7 @@ package com.ynzhongxi.gpsreport.utils;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -63,26 +64,37 @@ public class DateFormatUtil {
     public static String nowMilliSecond() {
         return DateUtil.format(new Date(), YYYYM_MDDH_HMMSSSSS_FORMAT);
     }
-    public  static  String simpleDate(Long  time){
-        return    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(time);
+
+    public static String simpleDate(Long time) {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(time);
     }
-    public static String  getCalendar(Date date){
-        SimpleDateFormat  sdf=new  SimpleDateFormat("yyyy-MM-dd");
-        Calendar calendar=new GregorianCalendar();
+
+    public static Date getCalendar(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar calendar = new GregorianCalendar();
         calendar.setTime(date);
-        calendar.add(calendar.DATE,-1);
-        return  sdf.format(calendar.getTime());
+        calendar.add(calendar.DATE, -1);
+        String format = sdf.format(calendar.getTime());
+        Date d = null;
+        try {
+            d = sdf.parse(format);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return d;
     }
-    public static  String  getYearMonth(Date date){
+
+    public static String getYearMonth(Date date) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
         Calendar calendar = new GregorianCalendar();
         calendar.setTime(date);
         calendar.add(Calendar.MONTH, -1);
         Date mdate = calendar.getTime();
-        return  format.format(mdate);
+        return format.format(mdate);
     }
-    public  static   String  getDate(Date  data){
-       String  sdf=new SimpleDateFormat("yyyy-MM-dd").format(data);
-        return  sdf;
+
+    public static String getDate(Date data) {
+        String sdf = new SimpleDateFormat("yyyy-MM-dd").format(data);
+        return sdf;
     }
 }
