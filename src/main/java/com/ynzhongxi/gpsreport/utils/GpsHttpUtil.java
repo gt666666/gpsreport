@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import cn.hutool.log.StaticLog;
 import com.ynzhongxi.gpsreport.component.ConfigProperty;
 import com.ynzhongxi.gpsreport.component.RedisUtils;
 import com.ynzhongxi.gpsreport.pojo.LogJsession;
@@ -37,9 +38,11 @@ public class GpsHttpUtil {
     }
 
     public String get(String url, Map<String, Object> param) {
+        Long time = System.currentTimeMillis();
         String baseUrl = property.getGpsDataserviceHttp();
         Object jsession = redis.get("jsession");
-        param.put("jsession", null == jsession ? "12345678" : jsession);
+        param.put("jsession", null == jsession ? "" : jsession);
+        StaticLog.info("#### {},HttpGet,URL:{},param:{}", time, url, param);
         String result = HttpUtil.get(baseUrl + url, param);
         JSONObject object = JSONUtil.parseObj(result);
         if (object.containsKey("result")) {
@@ -49,7 +52,7 @@ public class GpsHttpUtil {
                 result = get(url, param);
             }
         }
-        long  end=System.currentTimeMillis();
+        StaticLog.info("#### {},耗时：{}", time, System.currentTimeMillis() - time);
         return result;
     }
 

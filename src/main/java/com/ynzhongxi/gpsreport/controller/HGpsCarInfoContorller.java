@@ -6,6 +6,7 @@ import cn.hutool.core.util.URLUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import cn.hutool.log.StaticLog;
 import com.ynzhongxi.gpsreport.component.ConfigProperty;
 import com.ynzhongxi.gpsreport.pojo.HCarInfo;
 import com.ynzhongxi.gpsreport.pojo.HGpsCarDetails;
@@ -167,15 +168,16 @@ public class HGpsCarInfoContorller extends BaseController {
         this.mongoTemplate.insertAll(hgpsCarInfos);   //将所有回通司机的gps信息插入到数据库
         this.mongoTemplate.insertAll(hgpsCarDetails);//将每日详细插入到数据库
     }
+
     @GetMapping("/insertH")
-    public void insertH(String   date) throws ParseException {
-        SimpleDateFormat  sdf =new SimpleDateFormat("yyy-MM-dd");
+    public void insertH(String date) throws ParseException {
+        StaticLog.info("#### 回通手动导出同步数据");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyy-MM-dd");
         Date parse = sdf.parse(date);
         List<HCarInfo> carInfos = this.mongoTemplate.find(new Query(Criteria.where("deviceId").exists(true)), HCarInfo.class);   //查询出设备号不为空的所有驾驶员数据
         Iterator<HCarInfo> iter = carInfos.iterator();
         List<HGpsCarInfo> hgpsCarInfos = new ArrayList<>();    //保存所有驾驶员的台账信息
         List<HGpsCarDetails> hgpsCarDetails = new ArrayList<>();    //全部每日处理详细表
-        int n=0;
         while (iter.hasNext()) {
             HCarInfo carInfo = iter.next();
             HGpsCarInfo hgpsCarInfo = new HGpsCarInfo();
@@ -187,23 +189,23 @@ public class HGpsCarInfoContorller extends BaseController {
             map.put("vehiIdno", carInfo.getCarNumber());  //车牌号
             map.put("geoaddress", 1);//解析最新地理位置
             map.put("begintime", DateFormatUtil.simpleDate(parse.getTime()));  //开始时间
-            map.put("endtime", DateFormatUtil.simpleDate(parse.getTime()+85800000L));       //结束时间
+            map.put("endtime", DateFormatUtil.simpleDate(parse.getTime() + 85800000L));       //结束时间
             String in = gpsHttpUtil.get("/StandardApiAction_queryTrackDetail.action", map);//获取车辆最新位置
             JSONObject json2 = JSONUtil.parseObj(in);
             String tracks = json2.getStr("tracks");
             if (JSONUtil.isJsonArray(tracks)) {
-                if(JSONUtil.parseArray(tracks).size()>=1){
-                JSONObject info = JSONUtil.parseArray(tracks).getJSONObject( JSONUtil.parseArray(tracks).size()-1);
-                if (Tools.isString(info.getStr("gt"))&& Tools.isString(info.getStr("po"))) {   //判断返回的地理位置不能为空、最后在线时间不能为null
-                    hgpsCarInfo.setPos(info.getStr("po"));          //地理位置
-                    if ( parse.getTime() <= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(info.getStr("gt")).getTime() && new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(info.getStr("gt")).getTime() <=parse.getTime()+85800000L) {     //每晚23:50统计最后在线时间,当天时间范围00:00~23:50
-                        hgpsCarInfo.setTime(info.getStr("gt"));   //当天最后在线时间
-                        hgpsCarInfo.setOnline("是");    //GPS在线
-                    } else {
-                        hgpsCarInfo.setTime(" ");   //当天最后在线时间为空
-                        hgpsCarInfo.setOnline("否");   //GPS不在线
+                if (JSONUtil.parseArray(tracks).size() >= 1) {
+                    JSONObject info = JSONUtil.parseArray(tracks).getJSONObject(JSONUtil.parseArray(tracks).size() - 1);
+                    if (Tools.isString(info.getStr("gt")) && Tools.isString(info.getStr("po"))) {   //判断返回的地理位置不能为空、最后在线时间不能为null
+                        hgpsCarInfo.setPos(info.getStr("po"));          //地理位置
+                        if (parse.getTime() <= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(info.getStr("gt")).getTime() && new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(info.getStr("gt")).getTime() <= parse.getTime() + 85800000L) {     //每晚23:50统计最后在线时间,当天时间范围00:00~23:50
+                            hgpsCarInfo.setTime(info.getStr("gt"));   //当天最后在线时间
+                            hgpsCarInfo.setOnline("是");    //GPS在线
+                        } else {
+                            hgpsCarInfo.setTime(" ");   //当天最后在线时间为空
+                            hgpsCarInfo.setOnline("否");   //GPS不在线
+                        }
                     }
-                }
                 }
             }
             if ("是".equals(hgpsCarInfo.getOnline()) && null == hgpsCarInfo.getPos()) {
@@ -267,7 +269,7 @@ public class HGpsCarInfoContorller extends BaseController {
                 String sp = status.getStr("sp");
                 if (sp != null) {     //速度内容不能为空
                     try {
-                        if (parse.getTime() <= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(status.getStr("gt")).getTime() && new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(status.getStr("gt")).getTime() <= parse.getTime() +85800000L ) {
+                        if (parse.getTime() <= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(status.getStr("gt")).getTime() && new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(status.getStr("gt")).getTime() <= parse.getTime() + 85800000L) {
                             hgpsCarInfo.setSp(Integer.parseInt(sp) / 10.0);  //当天的速度
                         } else {
                             hgpsCarInfo.setSp(0.0);            //不再当天速度为0
@@ -287,8 +289,6 @@ public class HGpsCarInfoContorller extends BaseController {
         this.mongoTemplate.insertAll(hgpsCarInfos);   //将所有回通司机的gps信息插入到数据库
         this.mongoTemplate.insertAll(hgpsCarDetails);//将每日详细插入到数据库
     }
-
-
 
     @Scheduled(cron = "0 43 00 ? * *")    //每天00:43自动执行
     @GetMapping("/getByTimeHGpsCarInfoExport")
