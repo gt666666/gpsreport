@@ -1,50 +1,50 @@
 Manifest-Version: 1.0
-Class-Path: spring-oxm-5.1.9.RELEASE.jar aspectjweaver-1.9.4.jar netty
- -handler-4.1.38.Final.jar jetty-continuation-9.4.19.v20190610.jar jxl
- s-2.4.3.jar mongodb-driver-3.8.2.jar asm-commons-7.1.jar spring-boot-
- autoconfigure-2.1.7.RELEASE.jar commons-collections-3.2.1.jar spring-
- tx-5.1.9.RELEASE.jar netty-common-4.1.38.Final.jar jetty-util-9.4.19.
- v20190610.jar spring-boot-configuration-processor-2.1.7.RELEASE.jar j
- avax.websocket-api-1.1.jar spring-webmvc-5.1.9.RELEASE.jar spring-boo
- t-2.1.7.RELEASE.jar spring-boot-starter-data-redis-2.1.7.RELEASE.jar 
- javax.servlet-api-4.0.1.jar commons-logging-1.1.1.jar asm-analysis-7.
- 1.jar javax-websocket-server-impl-9.4.19.v20190610.jar bson-3.8.2.jar
-  poi-ooxml-3.17.jar spring-boot-starter-web-2.1.7.RELEASE.jar apache-
- el-8.5.40.jar jcl-over-slf4j-1.7.26.jar spring-core-5.1.9.RELEASE.jar
-  log4j-to-slf4j-2.11.2.jar hibernate-validator-6.0.17.Final.jar netty
- -codec-4.1.38.Final.jar slf4j-api-1.7.26.jar spring-data-mongodb-2.1.
- 10.RELEASE.jar jetty-servlet-9.4.19.v20190610.jar jetty-xml-9.4.19.v2
- 0190610.jar spring-data-keyvalue-2.1.10.RELEASE.jar spring-boot-start
- er-logging-2.1.7.RELEASE.jar lombok-1.18.8.jar spring-boot-starter-da
- ta-mongodb-2.1.7.RELEASE.jar websocket-common-9.4.19.v20190610.jar ja
- ckson-core-2.9.9.jar spring-boot-starter-json-2.1.7.RELEASE.jar xmlbe
- ans-2.6.0.jar jetty-security-9.4.19.v20190610.jar asm-7.1.jar javax.a
- nnotation-api-1.3.2.jar websocket-api-9.4.19.v20190610.jar spring-aop
- -5.1.9.RELEASE.jar reactor-core-3.2.11.RELEASE.jar lettuce-core-5.1.8
- .RELEASE.jar jxl-2.6.10.jar jetty-webapp-9.4.19.v20190610.jar jxls-po
- i-1.0.14.jar logback-core-1.2.3.jar spring-expression-5.1.9.RELEASE.j
- ar jetty-client-9.4.19.v20190610.jar spring-boot-starter-2.1.7.RELEAS
- E.jar reactive-streams-1.0.2.jar jxls-jexcel-1.0.6.jar validation-api
- -2.0.1.Final.jar logback-classic-1.2.3.jar spring-data-redis-2.1.10.R
- ELEASE.jar spring-test-5.2.0.RELEASE.jar spring-jcl-5.1.9.RELEASE.jar
-  javax-websocket-client-impl-9.4.19.v20190610.jar jetty-http-9.4.19.v
- 20190610.jar jetty-io-9.4.19.v20190610.jar netty-buffer-4.1.38.Final.
- jar poi-ooxml-schemas-3.17.jar spring-web-5.1.9.RELEASE.jar websocket
- -servlet-9.4.19.v20190610.jar jackson-module-parameter-names-2.9.9.ja
- r snakeyaml-1.23.jar jetty-annotations-9.4.19.v20190610.jar spring-bo
- ot-starter-aop-2.1.7.RELEASE.jar commons-collections4-4.1.jar mongodb
- -driver-core-3.8.2.jar hutool-all-4.5.1.jar spring-context-support-5.
- 1.9.RELEASE.jar classmate-1.4.0.jar jackson-datatype-jdk8-2.9.9.jar w
- ebsocket-server-9.4.19.v20190610.jar log4j-api-2.11.2.jar jackson-ann
- otations-2.9.0.jar stax-api-1.0.1.jar commons-codec-1.11.jar jetty-pl
- us-9.4.19.v20190610.jar jboss-logging-3.3.2.Final.jar netty-resolver-
- 4.1.38.Final.jar spring-data-commons-2.1.10.RELEASE.jar spring-beans-
- 5.1.9.RELEASE.jar spring-boot-starter-jetty-2.1.7.RELEASE.jar commons
- -beanutils-1.9.2.jar jackson-datatype-jsr310-2.9.9.jar jul-to-slf4j-1
- .7.26.jar asm-tree-7.1.jar commons-jexl-2.1.1.jar netty-transport-4.1
- .38.Final.jar websocket-client-9.4.19.v20190610.jar jetty-server-9.4.
- 19.v20190610.jar poi-3.17.jar log4j-1.2.14.jar spring-context-5.1.9.R
- ELEASE.jar jetty-servlets-9.4.19.v20190610.jar curvesapi-1.04.jar jac
- kson-databind-2.9.9.jar
+Class-Path: jetty-servlet-9.4.19.v20190610.jar reactive-streams-1.0.2.
+ jar javax-websocket-client-impl-9.4.19.v20190610.jar spring-expressio
+ n-5.1.9.RELEASE.jar jetty-annotations-9.4.19.v20190610.jar spring-aop
+ -5.1.9.RELEASE.jar hutool-all-4.5.1.jar commons-codec-1.11.jar spring
+ -test-5.2.0.RELEASE.jar spring-oxm-5.1.9.RELEASE.jar spring-boot-star
+ ter-json-2.1.7.RELEASE.jar websocket-client-9.4.19.v20190610.jar spri
+ ng-boot-starter-2.1.7.RELEASE.jar log4j-to-slf4j-2.11.2.jar jetty-ser
+ vlets-9.4.19.v20190610.jar poi-ooxml-3.17.jar netty-transport-4.1.38.
+ Final.jar reactor-core-3.2.11.RELEASE.jar xmlbeans-2.6.0.jar netty-co
+ dec-4.1.38.Final.jar spring-data-commons-2.1.10.RELEASE.jar asm-7.1.j
+ ar logback-classic-1.2.3.jar spring-tx-5.1.9.RELEASE.jar classmate-1.
+ 4.0.jar spring-boot-configuration-processor-2.1.7.RELEASE.jar spring-
+ boot-starter-jetty-2.1.7.RELEASE.jar spring-core-5.1.9.RELEASE.jar ne
+ tty-buffer-4.1.38.Final.jar asm-commons-7.1.jar jackson-datatype-jsr3
+ 10-2.9.9.jar bson-3.8.2.jar netty-common-4.1.38.Final.jar spring-data
+ -redis-2.1.10.RELEASE.jar jcl-over-slf4j-1.7.26.jar log4j-1.2.14.jar 
+ poi-3.17.jar mongodb-driver-3.8.2.jar spring-boot-starter-data-mongod
+ b-2.1.7.RELEASE.jar asm-analysis-7.1.jar spring-boot-starter-web-2.1.
+ 7.RELEASE.jar commons-logging-1.1.1.jar jetty-security-9.4.19.v201906
+ 10.jar jboss-logging-3.3.2.Final.jar spring-beans-5.1.9.RELEASE.jar s
+ pring-web-5.1.9.RELEASE.jar spring-context-support-5.1.9.RELEASE.jar 
+ jxls-jexcel-1.0.6.jar jetty-util-9.4.19.v20190610.jar jxls-2.4.3.jar 
+ jetty-client-9.4.19.v20190610.jar mongodb-driver-core-3.8.2.jar javax
+ .servlet-api-4.0.1.jar snakeyaml-1.23.jar spring-boot-autoconfigure-2
+ .1.7.RELEASE.jar javax.websocket-api-1.1.jar stax-api-1.0.1.jar sprin
+ g-context-5.1.9.RELEASE.jar commons-collections4-4.1.jar spring-data-
+ mongodb-2.1.10.RELEASE.jar jetty-plus-9.4.19.v20190610.jar jackson-an
+ notations-2.9.0.jar jetty-http-9.4.19.v20190610.jar javax.annotation-
+ api-1.3.2.jar websocket-common-9.4.19.v20190610.jar websocket-servlet
+ -9.4.19.v20190610.jar javax-websocket-server-impl-9.4.19.v20190610.ja
+ r jetty-server-9.4.19.v20190610.jar jackson-module-parameter-names-2.
+ 9.9.jar jetty-xml-9.4.19.v20190610.jar netty-handler-4.1.38.Final.jar
+  spring-boot-2.1.7.RELEASE.jar jxl-2.6.10.jar jetty-continuation-9.4.
+ 19.v20190610.jar jetty-webapp-9.4.19.v20190610.jar jxls-poi-1.0.14.ja
+ r logback-core-1.2.3.jar spring-webmvc-5.1.9.RELEASE.jar commons-jexl
+ -2.1.1.jar spring-boot-starter-data-redis-2.1.7.RELEASE.jar apache-el
+ -8.5.40.jar lettuce-core-5.1.8.RELEASE.jar jackson-databind-2.9.9.jar
+  aspectjweaver-1.9.4.jar spring-jcl-5.1.9.RELEASE.jar curvesapi-1.04.
+ jar spring-boot-starter-aop-2.1.7.RELEASE.jar slf4j-api-1.7.26.jar lo
+ g4j-api-2.11.2.jar jetty-io-9.4.19.v20190610.jar websocket-server-9.4
+ .19.v20190610.jar validation-api-2.0.1.Final.jar poi-ooxml-schemas-3.
+ 17.jar jul-to-slf4j-1.7.26.jar netty-resolver-4.1.38.Final.jar jackso
+ n-datatype-jdk8-2.9.9.jar hibernate-validator-6.0.17.Final.jar common
+ s-collections-3.2.1.jar spring-data-keyvalue-2.1.10.RELEASE.jar asm-t
+ ree-7.1.jar websocket-api-9.4.19.v20190610.jar lombok-1.18.8.jar spri
+ ng-boot-starter-logging-2.1.7.RELEASE.jar commons-beanutils-1.9.2.jar
+  jackson-core-2.9.9.jar
 Main-Class: com.ynzhongxi.gpsreport.GpsreportApplication
 

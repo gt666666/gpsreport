@@ -48,6 +48,7 @@ public class GpsHttpUtil {
                 result = get(url, param);
             }
         }
+        long  end=System.currentTimeMillis();
         return result;
     }
 

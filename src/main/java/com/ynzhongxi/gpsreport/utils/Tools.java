@@ -91,6 +91,13 @@ public class Tools {
         return ClassUtil.getClassPath();
     }
 
+    public static boolean isString(String str) {
+        if (str == null || "".equals(str)) {	// 验证失败
+            return false ;
+        }
+        return true ;
+    }
+
     /**
      * 获取用户真实IP地址，不使用request.getRemoteAddr();的原因是有可能用户使用了代理软件方式避免真实IP地址,
      * <p>

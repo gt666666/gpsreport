@@ -22,8 +22,6 @@ public class LoginController {
 
     @GetMapping("/login")
     public int login(Member member, HttpServletRequest request) {
-        System.out.println(member.getUserName());
-        System.out.println(member.getPassword());
         return this.loginService.login(member,request);
     }
 }

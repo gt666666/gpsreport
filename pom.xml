@@ -104,31 +104,45 @@
         </dependency>
         <!---->
     </dependencies>
+    <!-- 配置私服下载，没有私服删除即可 begin -->
+    <!--<repositories>-->
+        <!--<repository>-->
+            <!--<id>always_nexus</id>-->
+            <!--<url>http://192.168.2.88:8081/nexus/content/groups/public</url>-->
+            <!--<releases>-->
+                <!--<enabled>true</enabled>-->
+            <!--</releases>-->
+            <!--<snapshots>-->
+                <!--<enabled>true</enabled>-->
+            <!--</snapshots>-->
+        <!--</repository>-->
+    <!--</repositories>-->
+    <!--<pluginRepositories>-->
+        <!--<pluginRepository>-->
+            <!--<id>nexus</id>-->
+            <!--<name>Team Nexus Repository</name>-->
+            <!--<url>http://192.168.2.88:8081/nexus/content/groups/public</url>-->
+        <!--</pluginRepository>-->
+    <!--</pluginRepositories>-->
+    <!-- 配置私服下载，没有私服删除即可 end -->
 
     <build>
         <plugins>
             <plugin>  <!--项目打包处理发布-->
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <!-- 设置程序执行的主类 -->
-                    <mainClass>com.ynzhongxi.gpsreport.GpsreportApplication</mainClass>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <!-- 去除测试包 -->
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <!--<configuration>-->
+                    <!--&lt;!&ndash; 设置程序执行的主类 &ndash;&gt;-->
+                <!--&lt;!&ndash;<mainClass>com.ynzhongxi.gpsreport.GpsreportApplication</mainClass>&ndash;&gt;-->
+            <!--</configuration>-->
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.1</version>
                 <configuration>
-                    <source>10</source>
-                    <target>10</target>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>

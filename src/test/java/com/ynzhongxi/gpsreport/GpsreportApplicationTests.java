@@ -105,9 +105,8 @@ public class GpsreportApplicationTests {
         System.err.println("空数据:"+number);
 
     }
-
     @Test
-    public void getCArInformation() {
+    public void getCarInformation() {
         List<HGpsCarInfo> gpsCarInfos = gpsCarInfoService.carList(new HGpsCarInfo());
         for (HGpsCarInfo gpsCarInfo: gpsCarInfos){
             System.err.println(gpsCarInfo);
