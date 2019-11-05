@@ -47,8 +47,8 @@ public class DateFormatUtil {
      * @author "lixingwu"
      */
     public static String nowDateOffsetMinuteToStr(int offset) {
-        DateTime erexpireDatetime = DateUtil.offsetMinute(DateUtil.date(), offset);
-        return DateUtil.format(erexpireDatetime, DATETIME_FORMAT);
+        DateTime expireDatetime = DateUtil.offsetMinute(DateUtil.date(), offset);
+        return DateUtil.format(expireDatetime, DATETIME_FORMAT);
     }
 
     /**
@@ -66,35 +66,17 @@ public class DateFormatUtil {
     }
 
     public static String simpleDate(Long time) {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(time);
+        return new SimpleDateFormat(DATETIME_FORMAT).format(time);
     }
 
-    public static Date getCalendar(Date date) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Calendar calendar = new GregorianCalendar();
-        calendar.setTime(date);
-        calendar.add(calendar.DATE, -1);
-        String format = sdf.format(calendar.getTime());
-        Date d = null;
-        try {
-            d = sdf.parse(format);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return d;
-    }
-
-    public static String getYearMonth(Date date) {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
-        Calendar calendar = new GregorianCalendar();
-        calendar.setTime(date);
-        calendar.add(Calendar.MONTH, -1);
-        Date mdate = calendar.getTime();
-        return format.format(mdate);
-    }
-
-    public static String getDate(Date data) {
-        String sdf = new SimpleDateFormat("yyyy-MM-dd").format(data);
-        return sdf;
+    /**
+     * 指定时间的前一天
+     *
+     * @param date 指定时间
+     * @return
+     */
+    public static String getCalendar(Date date) {
+        DateTime expireDatetime = DateUtil.offsetDay(date, -1);
+        return DateUtil.format(expireDatetime, DATE_FORMAT_SHORT);
     }
 }
