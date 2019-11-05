@@ -649,6 +649,6 @@ public class TestMongo extends BaseSpringBootTest {
     }
     @Test
     public  void  insert(){
-        System.out.println( this.getClass().getResource("").getPath().substring(0,this.getClass().getResource("").getPath().indexOf("target"))+"src/main/resources/doc/月季度运营车辆GPS监控平台监控管理台账.xlsx");
+        System.out.println("111");
     }
 }

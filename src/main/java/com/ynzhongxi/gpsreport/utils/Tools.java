@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -345,5 +346,12 @@ public class Tools {
     public static void writeJson(HttpServletResponse response, Object object) {
         String text = JSONUtil.toJsonStr(object);
         ServletUtil.write(response, text, ContentType.JSON.toString());
+    }
+    public  static NumberFormat getNumberFormat(){
+        // 创建一个数值格式化对象
+        NumberFormat numberFormat = NumberFormat.getInstance();
+        // 设置精确到小数点后1位
+        numberFormat.setMaximumFractionDigits(1);
+        return   numberFormat;
     }
 }
