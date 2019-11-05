@@ -43,7 +43,7 @@ import java.util.*;
  */
 @RestController
 @RequestMapping(value = "/hGpsCarInfo")
-public class HGpsCarInfoContorller extends BaseController {
+public class HGpsCarInfoController extends BaseController {
     @Autowired
     private MongoTemplate mongoTemplate;
     @Autowired

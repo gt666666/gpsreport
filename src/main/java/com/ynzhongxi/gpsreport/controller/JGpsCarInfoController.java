@@ -43,7 +43,7 @@ import java.util.*;
  */
 @RestController
 @RequestMapping(value = "/jGpsCarInfo")
-public class JGpsCarInfoContorller {
+public class JGpsCarInfoController {
     @Autowired
     private MongoTemplate mongoTemplate;
     @Autowired

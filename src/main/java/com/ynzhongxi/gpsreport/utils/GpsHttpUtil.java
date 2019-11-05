@@ -4,11 +4,9 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import cn.hutool.log.StaticLog;
 import com.ynzhongxi.gpsreport.component.ConfigProperty;
 import com.ynzhongxi.gpsreport.component.RedisUtils;
 import com.ynzhongxi.gpsreport.pojo.LogJsession;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -23,27 +21,24 @@ import java.util.Map;
 @Component
 public class GpsHttpUtil {
     @Resource
-    private RedisUtils redis;
+    RedisUtils redis;
     @Resource
-    private ConfigProperty property;
+    ConfigProperty prop;
+    private final String BAST_URL = prop.getGpsDataserviceHttp();
 
     public String getJsession() {
-        String baseUrl = property.getGpsDataserviceHttp();
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("account", "htgs");
         paramMap.put("password", "000000");
-        String res = HttpUtil.post(baseUrl + "/StandardApiAction_login.action", paramMap);
+        String res = HttpUtil.post(BAST_URL + "/StandardApiAction_login.action", paramMap);
         LogJsession logsession = JSONUtil.toBean(res, LogJsession.class);
         return logsession.getJsession();
     }
 
     public String get(String url, Map<String, Object> param) {
-        Long time = System.currentTimeMillis();
-        String baseUrl = property.getGpsDataserviceHttp();
         Object jsession = redis.get("jsession");
-        param.put("jsession", null == jsession ? "" : jsession);
-        StaticLog.info("#### {},HttpGet,URL:{},param:{}", time, url, param);
-        String result = HttpUtil.get(baseUrl + url, param);
+        param.put("jsession", null == jsession ? "12345678" : jsession);
+        String result = HttpUtil.get(BAST_URL + url, param);
         JSONObject object = JSONUtil.parseObj(result);
         if (object.containsKey("result")) {
             Integer code = object.getInt("result");
@@ -52,7 +47,7 @@ public class GpsHttpUtil {
                 result = get(url, param);
             }
         }
-        StaticLog.info("#### {},耗时：{}", time, System.currentTimeMillis() - time);
+        long  end=System.currentTimeMillis();
         return result;
     }
 
