@@ -74,7 +74,7 @@ public class HGpsCarInfoController extends BaseController {
             String infoStr = json2.getStr("infos");
             if (JSONUtil.isJsonArray(infoStr)) {
                 JSONObject info = JSONUtil.parseArray(infoStr).getJSONObject(0);
-                if ("".equals(info.getStr("pos")) && info.getStr("tm") != null) {   //判断返回的地理位置不能为空、最后在线时间不能为null
+                if (!("".equals(info.getStr("pos"))) && info.getStr("tm") != null) {   //判断返回的地理位置不能为空、最后在线时间不能为null
                     hgpsCarInfo.setPos(info.getStr("pos"));          //地理位置
                     if (new Date().getTime() - 85800000L <= info.getLong("tm") && info.getLong("tm") <= new Date().getTime()) {     //每晚23:50统计最后在线时间,当天时间范围00:00~23:50
                         hgpsCarInfo.setTime(DateFormatUtil.simpleDate(info.getLong("tm")));   //当天最后在线时间
