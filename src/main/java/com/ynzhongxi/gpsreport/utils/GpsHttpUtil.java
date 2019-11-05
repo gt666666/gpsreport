@@ -43,17 +43,22 @@ public class GpsHttpUtil {
         Object jsession = redis.get("jsession");
         param.put("jsession", null == jsession ? "" : jsession);
         StaticLog.info("#### {},HttpGet,URL:{},param:{}", time, url, param);
-        String result = HttpUtil.get(baseUrl + url, param);
-        JSONObject object = JSONUtil.parseObj(result);
-        if (object.containsKey("result")) {
-            Integer code = object.getInt("result");
-            if (CollUtil.contains(CollUtil.toList(4, 5), code)) {
-                this.redis.set("jsession", this.getJsession());
-                result = get(url, param);
+        try {
+            String result = HttpUtil.get(baseUrl + url, param, 60 * 1000);
+            JSONObject object = JSONUtil.parseObj(result);
+            if (object.containsKey("result")) {
+                Integer code = object.getInt("result");
+                if (CollUtil.contains(CollUtil.toList(4, 5), code)) {
+                    this.redis.set("jsession", this.getJsession());
+                    result = get(url, param);
+                }
             }
+            StaticLog.info("#### {},耗时：{}", time, System.currentTimeMillis() - time);
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "{}";
         }
-        StaticLog.info("#### {},耗时：{}", time, System.currentTimeMillis() - time);
-        return result;
     }
 
 }
