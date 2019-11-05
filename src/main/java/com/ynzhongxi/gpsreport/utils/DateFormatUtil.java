@@ -77,6 +77,6 @@ public class DateFormatUtil {
      */
     public static String getCalendar(Date date) {
         DateTime expireDatetime = DateUtil.offsetDay(date, -1);
-        return DateUtil.format(expireDatetime, DATE_FORMAT_SHORT);
+        return DateUtil.format(expireDatetime, DATE_FORMAT);
     }
 }
