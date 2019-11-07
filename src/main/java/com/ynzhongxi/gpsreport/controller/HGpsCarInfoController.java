@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -46,8 +46,8 @@ import java.util.*;
 public class HGpsCarInfoController extends BaseController {
     @Autowired
     private MongoTemplate mongoTemplate;
-    @Autowired
-    private GpsHttpUtil gpsHttpUtil;
+    @Resource
+    private GpsHttpUtil gpsHttpUtils;
     @Autowired
     private HGpsCarInfoService hGpsCarInfoService;
     @Autowired
@@ -69,7 +69,7 @@ public class HGpsCarInfoController extends BaseController {
             map.put("devIdno", carInfo.getDeviceId());   //设备号
             map.put("vehiIdno", carInfo.getCarNumber());  //车牌号
             map.put("geoaddress", 1);//解析最新地理位置
-            String in = gpsHttpUtil.get("/StandardApiAction_vehicleStatus.action", map);//获取车辆最新位置
+            String in = gpsHttpUtils.get("/StandardApiAction_vehicleStatus.action", map);//获取车辆最新位置
             JSONObject json2 = JSONUtil.parseObj(in);
             String infoStr = json2.getStr("infos");
             if (JSONUtil.isJsonArray(infoStr)) {
@@ -93,7 +93,7 @@ public class HGpsCarInfoController extends BaseController {
             map.put("armType", "11,61,178,180,200,222,223,224,225,226,227,228,229,230,304,309,311,314,99,125,249,299,306,49,99,125,249,299,306,618,619"); //报警类型:  疲劳：49,99,125,249,299,306,618,619
             map.put("pageRecords", 100);   //显示前100条记录                                                      //超速：11,61,178,180,200,222,223,224,225,226,227,228,229,230,304,309,311,314
             map.put("toMap", 2);  //地图经纬度转换  2：百度地图解析可以解析出地址
-            String baoJin = gpsHttpUtil.get("/StandardApiAction_queryAlarmDetail.action", map); //获取设备超速、疲劳驾驶报警数据
+            String baoJin = gpsHttpUtils.get("/StandardApiAction_queryAlarmDetail.action", map); //获取设备超速、疲劳驾驶报警数据
             JSONObject json3 = JSONUtil.parseObj(baoJin);
             String alarmsStr = json3.getStr("alarms");
             hgpsCarInfo.setTired("");     //无疲劳
@@ -140,7 +140,7 @@ public class HGpsCarInfoController extends BaseController {
                 hgpsCarInfo.setProcessMode("□已短信告知驾驶员/  □ 已处理   □安全教育  □罚款");
             }
 
-            String sps = gpsHttpUtil.get("/StandardApiAction_getDeviceStatus.action", map);   //获取车辆速度
+            String sps = gpsHttpUtils.get("/StandardApiAction_getDeviceStatus.action", map);   //获取车辆速度
             JSONObject json4 = JSONUtil.parseObj(sps);
             String statusStr = json4.getStr("status");
             if (JSONUtil.isJsonArray(statusStr)) {
@@ -190,7 +190,7 @@ public class HGpsCarInfoController extends BaseController {
             map.put("geoaddress", 1);//解析最新地理位置
             map.put("begintime", DateFormatUtil.simpleDate(parse.getTime()));  //开始时间
             map.put("endtime", DateFormatUtil.simpleDate(parse.getTime() + 85800000L));       //结束时间
-            String in = gpsHttpUtil.get("/StandardApiAction_queryTrackDetail.action", map);//获取车辆最新位置
+            String in = gpsHttpUtils.get("/StandardApiAction_queryTrackDetail.action", map);//获取车辆最新位置
             JSONObject json2 = JSONUtil.parseObj(in);
             String tracks = json2.getStr("tracks");
             if (JSONUtil.isJsonArray(tracks)) {
@@ -215,7 +215,7 @@ public class HGpsCarInfoController extends BaseController {
             map.put("armType", "11,61,178,180,200,222,223,224,225,226,227,228,229,230,304,309,311,314,99,125,249,299,306,49,99,125,249,299,306,618,619"); //报警类型:  疲劳：49,99,125,249,299,306,618,619
             map.put("pageRecords", 100);   //显示前100条记录                                                      //超速：11,61,178,180,200,222,223,224,225,226,227,228,229,230,304,309,311,314
             map.put("toMap", 2);  //地图经纬度转换  2：百度地图解析可以解析出地址
-            String baoJin = gpsHttpUtil.get("/StandardApiAction_queryAlarmDetail.action", map); //获取设备超速、疲劳驾驶报警数据
+            String baoJin = gpsHttpUtils.get("/StandardApiAction_queryAlarmDetail.action", map); //获取设备超速、疲劳驾驶报警数据
             JSONObject json3 = JSONUtil.parseObj(baoJin);
             String alarmsStr = json3.getStr("alarms");
             hgpsCarInfo.setTired("");     //无疲劳
@@ -261,7 +261,7 @@ public class HGpsCarInfoController extends BaseController {
                 hgpsCarInfo.setData("无");    //无报警数据
                 hgpsCarInfo.setProcessMode("□已短信告知驾驶员/  □ 已处理   □安全教育  □罚款");
             }
-            String sps = gpsHttpUtil.get("/StandardApiAction_getDeviceStatus.action", map);   //获取车辆速度
+            String sps = gpsHttpUtils.get("/StandardApiAction_getDeviceStatus.action", map);   //获取车辆速度
             JSONObject json4 = JSONUtil.parseObj(sps);
             String statusStr = json4.getStr("status");
             if (JSONUtil.isJsonArray(statusStr)) {
