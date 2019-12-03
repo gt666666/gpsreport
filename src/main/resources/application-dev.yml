@@ -5,17 +5,18 @@ spring:
     mongodb:
       host: 127.0.0.1
       database: pgsReport
+      port: 27017
 
   redis:
     host: 127.0.0.1
-    password:
+    password: Redis_kmzx@1234
 
 logging:
   level:
     com:
       ynzhongxi:
         gpsreport: debug
-  file: E:/develop/logs/pgs_report/log.log-
+  file: E:/develop/logs/pgs_report/log.log
 
 custom:
   gps-cms-path: D:\\WebStorm\\gps_cms
